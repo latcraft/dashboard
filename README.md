@@ -1,1 +1,4 @@
-Check out http://shopify.github.com/dashing for more information.
+Latcraft Event Dashboard
+==========================
+
+
