@@ -10,7 +10,7 @@ class Dashing.Twitter extends Dashing.Widget
     @currentIndex = 0
 
   startCarousel: ->
-    setInterval(@nextComment, 8000)
+    setInterval(@nextComment, 10000)
 
   nextComment: =>
     comments = @get('comments')

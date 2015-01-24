@@ -1,7 +1,7 @@
 class Dashing.Sponsor extends Dashing.Widget
 
   ready: ->
-    @sponsors = [ '4finance', 'accenture', 'ctco', 'gi', 'google', 'ideaportriga', 'innowate', 'neueda', 'openshift', 'rubylight' ]
+    @sponsors = [ '4finance', 'askfm' ]
     @currentIndex = 0
     @sponsorElem = $(@node).find('.sponsor-container')
     @nextSponsor()

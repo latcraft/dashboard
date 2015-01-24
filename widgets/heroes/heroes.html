@@ -1,9 +1,9 @@
 <h1 class="header" data-bind="title"></h1>
 
-<h1 class="title" data-hideif="votes">Waiting...</h1>
+<h1 class="title" data-hideif="users">Waiting...</h1>
 
 <ul class="list-nostyle">
-  <li data-foreach-item="votes">
+  <li data-foreach-item="users">
     <table>  
       <tbody>
         <tr>
@@ -11,9 +11,8 @@
             <img data-bind-src="item.avatar">
           </td>
           <td>
-            <h3><span data-bind="item.author" class="label"></span></h3>
-            <h3><span data-bind="item.title" class="title"></span></h3>
-            <h3><span data-bind="item.rate | append ' points'" class="value"></span></h3>
+            <h3><span data-bind="item.name" class="label"></span></h3>
+            <h3><span data-bind="item.tweet_count | append ' tweets'" class="value"></span></h3>
           </td>
         </tr>
       </tbody>
