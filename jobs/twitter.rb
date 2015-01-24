@@ -100,7 +100,9 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
       i -= 1
     end
     activity = activity.sort { |a, b| a[:x] <=> b[:x] }
-    send_event('twitter_activity', { graphtype: 'bar', points: activity })
+    if !activity.empty?
+      send_event('twitter_activity', { graphtype: 'bar', points: activity })
+    end
 
     # Select top users that posted tweets within last 3 hours and send it to dashboard.
     top_users = []
@@ -112,7 +114,9 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
         tweet_count: row[0] 
       }
     end
-    send_event('twitter_top_users', { users: top_users })
+    if !top_users.empty?
+      send_event('twitter_top_users', { users: top_users })
+    end
 
   rescue Twitter::Error
     puts "\e[33mFor the twitter widget to work, you need to put in your twitter API keys in /etc/latcraft.yml file.\e[0m"
