@@ -1,0 +1,41 @@
+// ----------------------------------------------------------------------------
+// Sass declarations
+// ----------------------------------------------------------------------------
+$background-color:  #eb9c3c;
+
+$title-color:       rgba(255, 255, 255, 0.7);
+$moreinfo-color:    rgba(255, 255, 255, 0.7);
+
+// ----------------------------------------------------------------------------
+// widget-twitter styles
+// ----------------------------------------------------------------------------
+.widget-twitter {
+
+  background-color: $background-color;
+
+  .title {
+    color: $title-color;
+    margin-bottom: 15px;
+    font-size: 30px;
+  }
+
+  .comment {
+    font-size: 25px;
+  }
+
+  .name {
+    padding-left: 5px;
+  }
+
+  .comment-container {
+    display: none;
+    margin-left: auto; 
+    margin-right: auto; 
+    width: 95%;
+  }
+
+  .more-info {
+    color: $moreinfo-color;
+  }
+
+}
