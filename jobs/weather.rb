@@ -35,7 +35,7 @@ climacon_class_to_code = {
   'wind'             => [23, 24],  
 }
 
-def climacon_class(weather_code)
+def climacon_class(climacon_class_to_code, weather_code)
   climacon_class_to_code.select{ |k, v| v.include? weather_code.to_i }.to_a.first.first
 end 
 
@@ -53,6 +53,6 @@ SCHEDULER.every '1s', :first_in => 0 do |job|
     temp:      "#{weather_data['temp']}&deg;#{format.upcase}",
     condition: weather_data['text'],
     title:     "#{weather_location['city']} Weather",
-    climacon:  climacon_class(weather_data['code'])
+    climacon:  climacon_class(climacon_class_to_code, weather_data['code'])
   })
 end
