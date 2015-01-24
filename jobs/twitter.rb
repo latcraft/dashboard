@@ -59,7 +59,7 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
   begin
 
     # Perform Twitter search for most recent tweets.
-    tweets = twitter.search("#{search_term}", { :result_type => 'recent', :count => 100 })
+    tweets = twitter.search("#{search_query}", { :result_type => 'recent', :count => 100 })
 
     # Save all tweets in database for later query.
     if tweets
