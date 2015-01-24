@@ -104,7 +104,8 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
 
     # Select top users that posted tweets within last 3 hours and send it to dashboard.
     top_users = []
-    db.execute( "select count(*), name, avatar from tweets where date(created_at) < now - 3 and content not like 'RT%' group by 2, 3 order by 1 desc;" ) do |row|
+    query_time = Time.now.in_time_zone('Europe/Riga').advance(:hours => -12).iso8601
+    db.execute( "select count(*), name, avatar from tweets where datetime(created_at) > datetime(?) and content not like 'RT%' group by 2, 3 order by 1, 2 desc;", [query_time] ) do |row|
       top_users << { 
         name: row[1], 
         avatar: row[2],
