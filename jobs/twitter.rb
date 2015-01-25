@@ -84,6 +84,7 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
           avatar: "#{tweet.user.profile_image_url_https}",
           time: tweet.created_at.in_time_zone('Europe/Riga').strftime("%m-%d %H:%M:%S"), 
           body: tweet.text, 
+          # TODO: send also media information to show photos on tweet wall
         }
       end
       send_event('twitter_mentions', comments: tweets.sort { |a, b| b[:time] <=> a[:time] })
@@ -114,8 +115,9 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
         tweet_count: row[0] 
       }
     end
+    # TODO: filter own users
     if !top_users.empty?
-      send_event('twitter_top_users', { users: top_users })
+      send_event('twitter_top_users', { users: top_users.take(6) })
     end
 
   rescue Twitter::Error

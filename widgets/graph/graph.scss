@@ -43,6 +43,7 @@ $tick-color:        rgba(0, 0, 0, 0.4);
   .x_tick {
     position: absolute;
     bottom: 0;
+    // TODO: fix tick style
     .title {
       font-size: 20px;
       color: $tick-color;

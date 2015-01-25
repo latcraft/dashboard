@@ -14,6 +14,7 @@ class Dashing.Twitter extends Dashing.Widget
 
   nextComment: =>
     comments = @get('comments')
+    # TODO: replace html entities
     if comments
       @commentElem.fadeOut =>
         @set 'visible_comments', comments.slice(@currentIndex, @currentIndex + 3).concat(comments.slice(0, Math.max(0, @currentIndex + 3 - comments.length)))
