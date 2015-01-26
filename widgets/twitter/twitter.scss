@@ -19,7 +19,7 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
     font-size: 30px;
   }
 
-  .comment {
+  .tweet {
     font-size: 25px;
   }
 
@@ -27,11 +27,15 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
     padding-left: 5px;
   }
 
-  .comment-container {
+  .tweet-container {
     display: none;
     margin-left: auto; 
     margin-right: auto; 
     width: 95%;
+  }
+
+  .updated-at {
+    color: rgba(0, 0, 0, 0.3);
   }
 
   .more-info {

@@ -87,7 +87,7 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
           # TODO: send also media information to show photos on tweet wall
         }
       end
-      send_event('twitter_mentions', comments: tweets.sort { |a, b| b[:time] <=> a[:time] })
+      send_event('twitter_mentions', tweets: tweets.sort { |a, b| b[:time] <=> a[:time] })
     end
 
     # Select number of tweets posted per hour for last 10 hours and send it to dashboard.

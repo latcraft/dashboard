@@ -2,21 +2,21 @@ class Dashing.Twitter extends Dashing.Widget
 
   ready: ->
     @currentIndex = 0
-    @commentElem = $(@node).find('.comment-container')
-    @nextComment()
+    @tweetElem = $(@node).find('.tweet-container')
+    @nextTweet()
     @startCarousel()
 
   onData: (data) ->
     @currentIndex = 0
 
   startCarousel: ->
-    setInterval(@nextComment, 10000)
+    setInterval(@nextTweet, 10000)
 
-  nextComment: =>
-    comments = @get('comments')
+  nextTweet: =>
+    tweets = @get('tweets')
     # TODO: replace html entities
-    if comments
-      @commentElem.fadeOut =>
-        @set 'visible_comments', comments.slice(@currentIndex, @currentIndex + 3).concat(comments.slice(0, Math.max(0, @currentIndex + 3 - comments.length)))
-        @currentIndex = (@currentIndex + 3) % comments.length
-        @commentElem.fadeIn()
+    if tweets
+      @tweetElem.fadeOut =>
+        @set 'visible_tweets', tweets.slice(@currentIndex, @currentIndex + 3).concat(tweets.slice(0, Math.max(0, @currentIndex + 3 - tweets.length)))
+        @currentIndex = (@currentIndex + 3) % tweets.length
+        @tweetElem.fadeIn()
