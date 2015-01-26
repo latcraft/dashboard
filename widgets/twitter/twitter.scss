@@ -13,25 +13,33 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
 
   background-color: $background-color;
 
-  .title {
-    color: $title-color;
-    margin-bottom: 15px;
-    font-size: 30px;
-  }
-
-  .tweet {
-    font-size: 25px;
-  }
-
-  .name {
-    padding-left: 5px;
-  }
-
   .tweet-container {
     display: none;
     margin-left: auto; 
     margin-right: auto; 
     width: 95%;
+
+    .tweet-item {
+
+      text-align: left; 
+      margin-bottom: 25px
+
+      .tweet-time {
+        color: $title-color;
+        margin-bottom: 15px;
+        font-size: 20px;
+      }
+
+      .tweet-user {
+        padding-left: 5px;
+      }
+
+      .tweet-text {
+        font-size: 25px;
+      }
+
+    }
+
   }
 
   .updated-at {
