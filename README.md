@@ -1,8 +1,8 @@
-RigaDevDay Event Dashboard
+LatCraft Event Dashboard
 ==========================
 
-This is an official dashboard for RigaDevDay 2015. Implmentation is based on Shopify's Dashing.
+This is an official dashboard for LatCraft community events. Implementation is based on Shopify's Dashing.
 
-<img src="https://raw.githubusercontent.com/RigaDevDay/rdd-dashboard/master/assets/images/preview.png" />
+<img src="https://raw.githubusercontent.com/latcraft/dashboard/master/assets/images/preview.png" />
 
 
