@@ -7,3 +7,5 @@ gem 'json'
 gem 'activerecord'
 gem 'activesupport'
 gem 'sqlite3'
+gem 'htmlentities', '4.2.4'
+

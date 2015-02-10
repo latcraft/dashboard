@@ -4,6 +4,7 @@ require 'active_support/time'
 require 'yaml'
 require 'sqlite3'
 require 'active_record'
+require 'htmlentities'
 
 
 ###########################################################################
@@ -83,7 +84,7 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
           name: tweet.user.name, 
           avatar: "#{tweet.user.profile_image_url_https}",
           time: tweet.created_at.in_time_zone('Europe/Riga').strftime("%m-%d %H:%M:%S"), 
-          body: tweet.text, 
+          body: HTMLEntities.new.decode(tweet.text), 
           # TODO: send also media information to show photos on tweet wall
         }
       end
