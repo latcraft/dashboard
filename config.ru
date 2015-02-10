@@ -2,6 +2,7 @@ require 'dashing'
 
 configure do
   set :auth_token, 'NOT_PROTECTED'
+  set :default_dashboard, 'event'
   helpers do
     def protected!
     end
