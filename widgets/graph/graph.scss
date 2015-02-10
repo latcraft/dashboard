@@ -5,7 +5,7 @@ $background-color:  #dc5945;
 
 $title-color:       rgba(255, 255, 255, 0.7);
 $moreinfo-color:    rgba(255, 255, 255, 0.3);
-$tick-color:        rgba(0, 0, 0, 0.4);
+$tick-color:        rgba(0, 0, 0, 1);
 
 
 // ----------------------------------------------------------------------------
@@ -40,26 +40,22 @@ $tick-color:        rgba(0, 0, 0, 0.4);
     margin-top: 0;
   }
 
-  .x_tick {
-    position: absolute;
-    bottom: 0;
-    // TODO: fix tick style
-    .title {
-      font-size: 20px;
-      color: $tick-color;
-      opacity: 0.5;
-      padding-bottom: 3px;
+  .x_ticks_d3 {
+    font-size: 20px;
+    fill: $tick-color;
+    fill-opacity: 1.5;
+    text {
+      transform: translate(45px,0px);
     }
   }
 
   .y_ticks {
     font-size: 20px;
     fill: $tick-color;
-    fill-opacity: 1;
+    fill-opacity: 1.5;
   }
 
   .domain {
     display: none;
   }
-
 }
