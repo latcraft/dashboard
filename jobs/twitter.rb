@@ -127,5 +127,9 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
 end
 
 
+SCHEDULER.every '1h', :first_in => 0 do |job|
 
+  # TODO: extract all twitter followers and add/remove
+
+end
 
