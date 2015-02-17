@@ -7,3 +7,5 @@ twitter_access_token_secret : <INSERT YOUR VALUE>
 yahoo_woe_id                : 854823
 yahoo_weather_format        : 'c'
 schedule_data_file          : 'http://latcraft.lv/data/events.json'
+github_access_token         : <INSERT YOUR VALUE>
+github_organization         : latcraft
