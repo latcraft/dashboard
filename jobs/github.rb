@@ -11,9 +11,9 @@ global_config = YAML.load_file('/etc/latcraft.yml')
 # Configure GitHub client.
 ###########################################################################
 
-Octokit.auto_paginate = true
-github = Octokit::Client.new(:access_token => global_config['github_access_token'])
-github_org = global_config['github_organization']
+# Octokit.auto_paginate = true
+# github = Octokit::Client.new(:access_token => global_config['github_access_token'])
+# github_org = global_config['github_organization']
 
 
 ###########################################################################
@@ -22,8 +22,8 @@ github_org = global_config['github_organization']
 
 SCHEDULER.every '1m', :first_in => 0 do |job|
   # Collect current organization statistics
-  github.org_issues(github_org, :state => 'open')
-  github.org_repositories(github_org)
+  # github.org_issues(github_org, :state => 'open')
+  # github.org_repositories(github_org)
   # TODO: extract full number of branches
   # TODO: extract full number of commits
   # TODO: extract today's number of commits
