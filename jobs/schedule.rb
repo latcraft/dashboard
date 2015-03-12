@@ -18,36 +18,17 @@ global_config = YAML.load_file('/etc/latcraft.yml')
 ###########################################################################
 
 SCHEDULER.every '1m', :first_in => 0 do |job|
-  # current_time = Time.now.in_time_zone('Europe/Riga')
-  # schedule = JSON.parse(open(global_config['schedule_data_file']) { |f| f.read })
-  # TODO: make generic query to show next event
-  # TODO: say "thanks" to Teodor who changed data format
-  # next_event = schedule['events'].select { |event| event['date'] == '03.03.2015'}.first
+  current_time = Time.now.in_time_zone('Europe/Riga')
+  schedule = JSON.parse(open(global_config['schedule_data_file']) { |f| f.read })
+  # TODO: make generic query based on current date to show next event
+  next_event = schedule.select { |event| event['month'] == 'Apr 2015'}.first  
   # TODO: filter subevents based on current time to not show things that already happened
-  sessions = [
-    {
-      title: "Opening",
-      startTime: "18:30"
-    },
-    {
-      title: "The Sweet Flavour of Rust",
-      startTime: "18:45",
-      author: "Leonids Maslovs",
-      avatar: "http://latcraft.lv/img/speakers/maslov.png"
-    },
-    {
-      title: "The Way to Go",
-      startTime: "19:45",
-      author: "Anatoly Ressin",
-      avatar: "http://latcraft.lv/img/speakers/ressin.png"
-    },
-    {
-      title: "There is Always Erlang",
-      startTime: "20:45",
-      author: "Jurijs Saveljevs",
-      avatar: "http://latcraft.lv/img/speakers/savelyev.png"
-    }
-  ]
+  sessions = next_event['schedule']
+  sessions.each do |session|
+    if !session['img'].nil? and !session['img'].empty? and !session['img'].start_with?('http')
+      session['img'] = "http://latcraft.lv/" + session['img']
+    end
+  end
   send_event('schedule', sessions: sessions)
 end
 
