@@ -21,7 +21,7 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
   current_time = Time.now.in_time_zone('Europe/Riga')
   schedule = JSON.parse(open(global_config['schedule_data_file']) { |f| f.read })
   # TODO: make generic query based on current date to show next event
-  next_event = schedule.select { |event| event['month'] == 'Apr 2015'}.first  
+  next_event = schedule.select { |event| event['month'] == 'May 2015'}.first  
   # TODO: filter subevents based on current time to not show things that already happened
   sessions = next_event['schedule']
   sessions.each do |session|
