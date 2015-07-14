@@ -32,3 +32,5 @@ Gemfile.lock
 .vagrant
 latcraft.yml
 history.yml
+
+config/ga-private.p12

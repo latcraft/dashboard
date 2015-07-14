@@ -19,3 +19,7 @@ COPY ./config/latcraft.yml /etc/latcraft.yml
 VOLUME /vagrant
 
 RUN cd /vagrant && bundle install
+
+ENTRYPOINT ["dashing"]
+CMD ["start"]
+
