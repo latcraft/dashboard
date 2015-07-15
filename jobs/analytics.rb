@@ -1,7 +1,10 @@
 # Modified from https://github.com/google/google-api-ruby-client-samples/blob/1480725b07e7048bc5dc7048606a016c5a8378a7/service_account/analytics.rb
 # Inspired by https://gist.github.com/3166610
-require 'google/api_client'
+require 'active_record'
+require 'active_support/time'
 require 'date'
+require 'google/api_client'
+require 'sqlite3'
 require 'yaml'
 
 API_VERSION = 'v3'
@@ -82,10 +85,78 @@ class GaQueryClient
   end
 end
 
+class GaSQLite
+  @@db_con = nil
 
+  def initialize(global_config)
+    db_path = global_config['ga_db_path'] || '/var/lib/sqlite/ga-metrics.db'
+    if @@db_con.nil? then
+      @@db_con = SQLite3::Database.new db_path
+      ActiveRecord::Base.establish_connection(
+        :adapter => 'sqlite3',
+        :database => db_path
+      )
+    end
+  end
+
+  def execute(sql)
+    @@db_con.execute(sql)
+  end
+end
+
+class GaData < ActiveRecord::Base
+end
+
+class GaSQLiteMetrics
+  def initialize(db, name, attributes)
+    def _2_columns(elems)
+      elems.map {|e| e.gsub("ga:", "")}
+    end
+
+    @db = db
+    @name = name
+
+    @index_columns = _2_columns(["ga_period"] + attributes['dimension'].split(','))
+    @additional_index = []
+    @additional_index = _2_columns(["ga_period"] + attributes['db_index'].split(',')) if attributes.has_key?('db_index')
+
+    @columns = _2_columns(attributes['dimension'].split(',') + [attributes['metric']])
+
+    sqls = [
+      "CREATE TABLE IF NOT EXISTS #{@name}(#{(["ga_period"] + @columns).map {|c| "#{c} TEXT" }.join(", ")});",
+      "CREATE UNIQUE INDEX IF NOT EXISTS #{@name}_UNIQUE ON #{@name} (#{@index_columns.join(", ")});",
+    ]
+
+    sqls += [ "CREATE UNIQUE INDEX IF NOT EXISTS #{@name}_UNIQUE_EXTRA ON #{@name} (#{@additional_index.join(", ")});" ] if @additional_index.length > 1
+
+    sqls.each { |sql| @db.execute(sql) }
+  end
+
+  def push!(start_date, end_date, data)
+    period = "#{start_date}-#{end_date}"
+    @db.execute "delete from #{@name} where ga_period='#{period}';"
+    data.rows.map {|row| 
+      "insert into #{@name}(ga_period, #{data.column_headers.map{|c|c.name.gsub("ga:", "")}.join(", ") })
+       values('#{period}', #{row.map{|v| "'#{v}'"}.join(", ")});"
+    }
+    .each {|sql|
+      @db.execute(sql)
+    }
+  end
+
+  def active_record
+    klazz = Class.new(GaData)
+    klazz.set_table_name @name
+    # Memory leak?
+    klazz
+  end
+end
+
+@db = GaSQLite.new(global_opts)
 @client = GaQueryClient.new(global_opts)
+
 ## For the moment start and end dates defined here
-start_date = DateTime.now.prev_month.strftime("%Y-%m-%d")
+start_date = DateTime.now.yesterday.strftime("%Y-%m-%d")
 end_date = DateTime.now.strftime("%Y-%m-%d")
 
 ## Dimensions and Metrics Reference: https://developers.google.com/analytics/devguides/reporting/core/dimsmets
@@ -97,11 +168,15 @@ ga_attributes_yml = global_opts['ga_attributes_yml']
 attributes = YAML.load_file(ga_attributes_yml)
 
 attributes.each_key { |key|
-  outfile = File.new("#{key}.txt", "w")
   gadata = @client.query(start_date, end_date, attributes[key]['dimension'], attributes[key]['metric'], attributes[key]['sort'])
-  outfile.puts gadata.data.column_headers.map { |c| c.name.gsub("ga:","") }.join("\t")
-  gadata.data.rows.each do |r|
-    outfile.puts r.join("\t")
-  end
+  require 'pry'
+  binding.pry
+  sql_data = GaSQLiteMetrics.new(@db, key, attributes[key])
+  sql_data.push! start_date, end_date, gadata.data
+  #outfile = File.new("#{key}.txt", "w")
+  #outfile.puts gadata.data.column_headers.map { |c| c.name.gsub("ga:","") }.join("\t")
+  #gadata.data.rows.each do |r|
+  #  outfile.puts r.join("\t")
+  #end
 }
 
