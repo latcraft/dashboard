@@ -5,17 +5,19 @@ require 'date'
 require 'yaml'
 
 API_VERSION = 'v3'
-CACHED_API_FILE = "analytics-#{API_VERSION}.cache"
+
+CACHED_API_FILE = "#{ENV["TMPDIR"] || "/tmp/"}.ga-analytics-#{API_VERSION}.cache"
 
 ## Read app credentials from a file
-opts = YAML.load_file("ga_config.yml")
+global_config = YAML.load_file('/etc/latcraft.yml')
+opts = global_config['ga'] || {}
 
 ## Update these to match your own apps credentials in the ga_config.yml file
 service_account_email = opts['service_account_email']  # Email of service account
 key_file = opts['key_file']                            # File containing your private key
 key_secret = opts['key_secret']                        # Password to unlock private key
-@profileID = opts['profileID'].to_s                    # Analytics profile ID.
-
+ga_attributes_yml = opts['ga_attributes_yml']
+@profileID = opts['profile_id'].to_s                   # Analytics profile ID.
 
 @client = Google::APIClient.new(
   :application_name => opts['application_name'],
@@ -67,8 +69,6 @@ def query_ga (dimension, metric, sort)
   }
 
   result = @client.execute(:api_method => @analytics.data.ga.get, :parameters => parameters)
-  #require 'pry'
-  #binding.pry
   if result.status == 200 then
     # Everything is OK
   else
@@ -83,7 +83,7 @@ end
 ## A single metrics data request to be retrieved from the API is limited to a maximum of 10 metrics
 
 ## Set of dimensions and metrics to query in a file and iterate
-attributes = YAML.load_file("ga_attributes.yml")
+attributes = YAML.load_file(ga_attributes_yml)
 
 attributes.each_key { |key|
   outfile = File.new("#{key}.txt", "w")
