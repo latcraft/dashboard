@@ -43,7 +43,7 @@ visitCountVisitors:
   dimension: ga:sessionCount
   metric: 'ga:users,ga:sessions'
   sort: -ga:sessions
-#HourOfDayWeek:
-#  dimension: 'ga:week,ga:nthWeek,ga:hour'
-#  metric: ga:sessions
-#  sort: 'ga:hour,ga:nthWeek'
+HourOfDayWeek:
+  dimension: 'ga:week,ga:nthWeek,ga:hour'
+  metric: ga:sessions
+  sort: 'ga:hour,ga:nthWeek'
