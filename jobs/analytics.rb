@@ -104,60 +104,61 @@ class GaSQLite
   end
 end
 
-class GaData < ActiveRecord::Base
-end
-
 class GaSQLiteMetrics
-  def initialize(db, name, attributes)
-    def _2_columns(elems)
-      elems.map {|e| e.gsub("ga:", "")}
-    end
+  @@types = {
+    "STRING"  => "TEXT",
+    "INTEGER" => "INTEGER",
+    "PERCENT" => "INTEGER",
+    "TIME"    => "NUMBER(3,2)",
+  }
 
+  def initialize(db, name)
     @db = db
     @name = name
+  end
 
-    @index_columns = _2_columns(["ga_period"] + attributes['dimension'].split(','))
-    @additional_index = []
-    @additional_index = _2_columns(["ga_period"] + attributes['db_index'].split(',')) if attributes.has_key?('db_index')
-
-    @columns = _2_columns(attributes['dimension'].split(',') + [attributes['metric']])
+  def create_table!(data)
+    columns = ["ga_period TEXT"] + data.column_headers.map{|c| "#{_column(c.name)} #{@@types[c.dataType] || 'TEXT'}"}
+    index_columns = ["ga_period"] + data.column_headers.select{|h| h.columnType == "DIMENSION"}.map{|c| _column(c.name)}
 
     sqls = [
-      "CREATE TABLE IF NOT EXISTS #{@name}(#{(["ga_period"] + @columns).map {|c| "#{c} TEXT" }.join(", ")});",
-      "CREATE UNIQUE INDEX IF NOT EXISTS #{@name}_UNIQUE ON #{@name} (#{@index_columns.join(", ")});",
+      "CREATE TABLE IF NOT EXISTS #{@name}(#{columns.join(", ")});",
+      "CREATE UNIQUE INDEX IF NOT EXISTS #{@name}_DIMENSION ON #{@name} (#{index_columns.join(", ")});",
     ]
-
-    sqls += [ "CREATE UNIQUE INDEX IF NOT EXISTS #{@name}_UNIQUE_EXTRA ON #{@name} (#{@additional_index.join(", ")});" ] if @additional_index.length > 1
 
     sqls.each { |sql| @db.execute(sql) }
   end
 
-  def push!(start_date, end_date, data)
-    period = "#{start_date}-#{end_date}"
-    @db.execute "delete from #{@name} where ga_period='#{period}';"
-    data.rows.map {|row| 
-      "insert into #{@name}(ga_period, #{data.column_headers.map{|c|c.name.gsub("ga:", "")}.join(", ") })
-       values('#{period}', #{row.map{|v| "'#{v}'"}.join(", ")});"
-    }
-    .each {|sql|
-      @db.execute(sql)
+  def push_data!(period, data)
+    _Q = active_record
+    _Q.reset_column_information
+    _Q.where(ga_period: period).delete_all
+
+    data.rows.map {|row|
+      q = _Q.new
+      q.attributes = Hash[data.column_headers.map {|c| _column(c.name)}.zip(row)]
+      q.ga_period = period
+      q.save
     }
   end
 
   def active_record
-    klazz = Class.new(GaData)
-    klazz.set_table_name @name
     # Memory leak?
+    klazz = Class.new(ActiveRecord::Base) do  
+      self.table_name = @name
+    end
+    klazz.table_name = @name
     klazz
   end
+
+  def _column(name)
+    name.gsub("ga:", "")
+  end
+
 end
 
 @db = GaSQLite.new(global_opts)
 @client = GaQueryClient.new(global_opts)
-
-## For the moment start and end dates defined here
-start_date = DateTime.now.yesterday.strftime("%Y-%m-%d")
-end_date = DateTime.now.strftime("%Y-%m-%d")
 
 ## Dimensions and Metrics Reference: https://developers.google.com/analytics/devguides/reporting/core/dimsmets
 ## A single dimension data request to be retrieved from the API is limited to a maximum of 7 dimensions
@@ -167,16 +168,13 @@ ga_attributes_yml = global_opts['ga_attributes_yml']
 ## Set of dimensions and metrics to query in a file and iterate
 attributes = YAML.load_file(ga_attributes_yml)
 
-attributes.each_key { |key|
-  gadata = @client.query(start_date, end_date, attributes[key]['dimension'], attributes[key]['metric'], attributes[key]['sort'])
-  require 'pry'
-  binding.pry
-  sql_data = GaSQLiteMetrics.new(@db, key, attributes[key])
-  sql_data.push! start_date, end_date, gadata.data
-  #outfile = File.new("#{key}.txt", "w")
-  #outfile.puts gadata.data.column_headers.map { |c| c.name.gsub("ga:","") }.join("\t")
-  #gadata.data.rows.each do |r|
-  #  outfile.puts r.join("\t")
-  #end
+# will query for one single date, yesterday
+date_day = DateTime.now.yesterday.strftime("%Y-%m-%d")
+
+attributes.each_key { |name|
+  gadata = @client.query(date_day, date_day, attributes[name]['dimension'], attributes[name]['metric'], attributes[name]['sort'])
+  sql_data = GaSQLiteMetrics.new(@db, name)
+  sql_data.create_table!    gadata.data
+  sql_data.push_data!       "date_#{date_day}", gadata.data
 }
 
