@@ -10,7 +10,7 @@ schedule_data_file          : 'https://raw.githubusercontent.com/latcraft/websit
 github_access_token         : <INSERT YOUR VALUE>
 github_organization         : latcraft
 
-ga:
+google_analytics:
   application_version: 1.0
   application_name: ga-latcraft-dashboard
   service_account_email: <INSERT YOUR VALUE>@developer.gserviceaccount.com
@@ -18,4 +18,7 @@ ga:
   key_file: /etc/latcraft-ga-private.p12
   key_secret: <INSERT YOUR VALUE>
   profile_id: <INSERT YOUR VALUE>
-  ga_attributes_yml: /etc/latcraft-ga_attributes.yml
+  ga_attributes_today_yml: /etc/latcraft-ga_attributes.yml
+  ga_attributes_daily_yml: /etc/latcraft-ga_attributes.yml
+  ga_attributes_monthly_yml: /vagrant/config/ga_attributes.yml
+
