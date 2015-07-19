@@ -1,4 +1,5 @@
 
+require 'yaml'
 require 'net/http'
 require 'xmlsimple'
 

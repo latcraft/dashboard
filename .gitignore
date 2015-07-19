@@ -1,3 +1,10 @@
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
+
 *.gem
 *.rbc
 /.config
@@ -32,3 +39,5 @@ Gemfile.lock
 .vagrant
 latcraft.yml
 history.yml
+
+config/ga-private.p12

@@ -1,7 +1,8 @@
 source 'https://rubygems.org'
 
-gem 'dashing', '1.3.4'
+gem 'dashing'
 gem 'twitter', '5.14.0'
+gem 'google-api-client', '0.8.6'
 gem 'xml-simple', '1.1.4'
 gem 'json', '1.8.2'
 gem 'activerecord', '4.2.0'

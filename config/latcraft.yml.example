@@ -9,3 +9,39 @@ yahoo_weather_format        : 'c'
 schedule_data_file          : 'https://raw.githubusercontent.com/latcraft/website/master/data/events.json'
 github_access_token         : <INSERT YOUR VALUE>
 github_organization         : latcraft
+
+google_analytics:
+  application_version: 1.0
+  application_name: ga-latcraft-dashboard
+
+  # OAuth credentials
+  # How to:
+  #   - Open Google API console - https://code.google.com/apis/console
+  #   - In the `Api & Auth`
+  #      - In `API` enable GA APIs
+  #      - In `Credentials` use `Create new Client ID`, `Service Account`,
+  #        `P12 key` (tested with p12 key)
+  service_account_email: <INSERT YOUR VALUE>@developer.gserviceaccount.com
+  client_id: <INSERT YOUR VALUE>.apps.googleusercontent.com
+  key_file: /etc/latcraft-ga-private.p12
+  key_secret: <INSERT YOUR VALUE>
+
+  # GA profile.
+  #   How to obtain: in GA open `Admin`, `View` tab, `View Settings`
+  #   Copy `View ID`
+  # GA permissions:
+  #   In the same `View` go to `User Management` and add service_account_email
+  #   as user, grant read & analyze permissions
+  profile_id: <INSERT YOUR VALUE>
+
+
+  ## Dimensions and Metrics Reference: https://developers.google.com/analytics/devguides/reporting/core/dimsmets
+  ## A single dimension data request to be retrieved from the API is limited to a maximum of 7 dimensions
+  ## A single metrics data request to be retrieved from the API is limited to a maximum of 10 metrics
+  # Metrics obtained for today's GA stats
+  ga_attributes_today_yml:    /etc/latcraft-ga_attributes.yml
+  # Metrics obtained for daily GA stats
+  ga_attributes_daily_yml:    /etc/latcraft-ga_attributes.yml
+  # Metrics obtained for monthly stats
+  ga_attributes_monthly_yml:  /etc/latcraft-ga_attributes.yml
+
