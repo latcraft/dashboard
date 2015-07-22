@@ -99,11 +99,16 @@ class GaQueryClient
      else
        # modify in place.
        # Headers are already there. Will append data.rows only
-       data.rows.concat(result.data.rows)
+       data.rows = data.rows.concat(result.data.rows)
      end
 
-     break unless result.next_page_token
-     request = result.next_page
+     # GA api has broken pagination support.
+     # Idiomatic Google API service should use next_page_token and next_page
+     # HOWEVER, GA v3 does not handle that well (as expected)
+     # Thus, in case of paging - we need to do manually by request parameters
+     break unless result.data.next_link
+     request[:parameters]['start-index'] = data.rows.length + 1
+     request[:parameters]['max-results'] = data.itemsPerPage
    end
 
    data
@@ -275,14 +280,14 @@ SCHEDULER.cron '*/5 * * * *' do
   end
 end
 
-## Test loop
+### Test loop
 # while true do
 #   begin
 #     ## No need to store, send to widget instead immediately?
 #     attributes = attributes_yaml("today")
 #     # will query for one single date, today
 #     today = DateTime.now
-# 
+#
 #     attributes.each_key { |name|
 #       gadata = @client.query(today, today, attributes[name]['dimension'], attributes[name]['metric'], attributes[name]['sort'])
 #       sql_data = GaSQLiteMetrics.new(@db_con, name)
