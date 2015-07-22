@@ -61,35 +61,54 @@ class GaQueryClient
     end
   end
 
-  ## Query Parameters Summary https://developers.google.com/analytics/devguides/reporting/core/v3/reference#q_summary
-  ## Funcation to query google for a set of analytics attributes
+ ## Query Parameters Summary https://developers.google.com/analytics/devguides/reporting/core/v3/reference#q_summary
+ ## Funcation to query google for a set of analytics attributes
  def query(start_date, end_date, dimension, metric, sort)
-    parameters = {
-      'ids' => "ga:" + @profileID,
-      'start-date' => start_date.strftime("%Y-%m-%d"),
-      'end-date' => end_date.strftime("%Y-%m-%d"),
-      'dimensions' => dimension,
-      'metrics' => metric,
-      'sort' => sort
-    }
+   request = {
+     :api_method => @analytics.data.ga.get,
+     :parameters => {
+       'ids' => "ga:" + @profileID,
+       'start-date' => start_date.strftime("%Y-%m-%d"),
+       'end-date' => end_date.strftime("%Y-%m-%d"),
+       'dimensions' => dimension,
+       'metrics' => metric,
+       'sort' => sort,
+     },
+   }
 
-    result = @client.execute(:api_method => @analytics.data.ga.get, :parameters => parameters)
+   data = nil
 
-    # For some weird reason Google API do not throw exceptions in this endpoint
-    # And don't have `.success` kind of status checks
-    #
-    # Instead we need to check result for HTTP status codes ourselves (manually).
-    # In our case we've decided to throw exception.
-    if result.status == 200 then
-      # Everything is OK
-    else
-      # Error, like HTTP 403, permission denied
-      # Rewrap in Google ClientError
-      raise Google::APIClient::ClientError.new "GA error #{result.data.error['code']}: #{result.data.error['message']}"
-    end
+   loop do
+     result = @client.execute(request)
 
-    return result
-  end
+     # For some weird reason Google API do not throw exceptions in this endpoint
+     # And don't have `.success` kind of status checks
+     #
+     # Instead we need to check result for HTTP status codes ourselves (manually).
+     # In our case we've decided to throw exception.
+     if result.status == 200 then
+       # Everything is OK
+     else
+       # Error, like HTTP 403, permission denied
+       # Rewrap in Google ClientError
+       raise Google::APIClient::ClientError.new "GA error #{result.data.error['code']}: #{result.data.error['message']}"
+     end
+
+     if data.nil? then
+       data = result.data
+     else
+       # modify in place.
+       # Headers are already there. Will append data.rows only
+       data.rows.concat(result.data.rows)
+     end
+
+     break unless result.next_page_token
+     request = result.next_page
+   end
+
+   data
+ end
+
 end
 
 class GaSQLiteDB
@@ -211,8 +230,8 @@ SCHEDULER.cron '5 0 1 * *' do
     attributes.each_key { |name|
       gadata = @client.query(month_start, month_end, attributes[name]['dimension'], attributes[name]['metric'], attributes[name]['sort'])
       sql_data = GaSQLiteMetrics.new(@db_con, name)
-      sql_data.create_table!    gadata.data
-      sql_data.push_data!       "month_#{month_start.strftime('%Y_%m')}", gadata.data
+      sql_data.create_table!    gadata
+      sql_data.push_data!       "month_#{month_start.strftime('%Y_%m')}", gadata
     }
   rescue => e
     puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
@@ -229,8 +248,8 @@ SCHEDULER.cron '5 0 * * *' do
     attributes.each_key { |name|
       gadata = @client.query(prev_day, prev_day, attributes[name]['dimension'], attributes[name]['metric'], attributes[name]['sort'])
       sql_data = GaSQLiteMetrics.new(@db_con, name)
-      sql_data.create_table!    gadata.data
-      sql_data.push_data!       "daily_#{prev_day.strftime('%Y_%m_%d')}", gadata.data
+      sql_data.create_table!    gadata
+      sql_data.push_data!       "daily_#{prev_day.strftime('%Y_%m_%d')}", gadata
     }
   rescue => e
     puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
@@ -248,28 +267,29 @@ SCHEDULER.cron '*/5 * * * *' do
     attributes.each_key { |name|
       gadata = @client.query(today, today, attributes[name]['dimension'], attributes[name]['metric'], attributes[name]['sort'])
       sql_data = GaSQLiteMetrics.new(@db_con, name)
-      sql_data.create_table!    gadata.data
-      sql_data.push_data!       "today", gadata.data
+      sql_data.create_table!    gadata
+      sql_data.push_data!       "today", gadata
     }
   rescue => e
     puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
   end
 end
 
-while true do
-  begin
-    ## No need to store, send to widget instead immediately?
-    attributes = attributes_yaml("today")
-    # will query for one single date, today
-    today = DateTime.now
-
-    attributes.each_key { |name|
-      gadata = @client.query(today, today, attributes[name]['dimension'], attributes[name]['metric'], attributes[name]['sort'])
-      sql_data = GaSQLiteMetrics.new(@db_con, name)
-      sql_data.create_table!    gadata.data
-      sql_data.push_data!       "today", gadata.data
-    }
-  rescue => e
-    puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
-  end
-end
+## Test loop
+# while true do
+#   begin
+#     ## No need to store, send to widget instead immediately?
+#     attributes = attributes_yaml("today")
+#     # will query for one single date, today
+#     today = DateTime.now
+# 
+#     attributes.each_key { |name|
+#       gadata = @client.query(today, today, attributes[name]['dimension'], attributes[name]['metric'], attributes[name]['sort'])
+#       sql_data = GaSQLiteMetrics.new(@db_con, name)
+#       sql_data.create_table!    gadata
+#       sql_data.push_data!       "today", gadata
+#     }
+#   rescue => e
+#     puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
+#   end
+# end
