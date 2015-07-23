@@ -61,7 +61,7 @@ class GaQueryClient
 
  ## Query Parameters Summary https://developers.google.com/analytics/devguides/reporting/core/v3/reference#q_summary
  ## Funcation to query google for a set of analytics attributes
- def query(start_date, end_date, metrics, dimensions, sort)
+ def query_iterate!(start_date, end_date, metrics, dimensions, sort, page_size=1000 ** 3, &block)
    request = {
      :api_method => @analytics.data.ga.get,
      :parameters => {
@@ -71,13 +71,16 @@ class GaQueryClient
        'metrics' => metrics,
        'dimensions' => dimensions,
        'sort' => sort,
+       'start-index' => 1,
+       'max-results' => page_size,
      },
    }
 
-   data = nil
+   page = 0
 
    loop do
      result = @client.execute!(request)
+     page += 1
 
      # For some weird reason Google API do not throw exceptions in this endpoint
      # And don't have `.success` kind of status checks
@@ -92,24 +95,16 @@ class GaQueryClient
        raise Google::APIClient::ClientError.new "GA error #{result.data.error['code']}: #{result.data.error['message']}"
      end
 
-     if data.nil? then
-       data = result.data
-     else
-       # modify in place.
-       # Headers are already there. Will append data.rows only
-       data.rows = data.rows.concat(result.data.rows)
-     end
+     block.call(result.data)
 
      # GA api has broken pagination support.
      # Idiomatic Google API service should use next_page_token and next_page
      # HOWEVER, GA v3 does not handle that well (as expected)
      # Thus, in case of paging - we need to do manually by request parameters
      break unless result.data.next_link
-     request[:parameters]['start-index'] = data.rows.length + 1
-     request[:parameters]['max-results'] = data.itemsPerPage
+     request[:parameters]['start-index'] = page * result.data.itemsPerPage + 1
+     request[:parameters]['max-results'] = result.data.itemsPerPage
    end
-
-   data
  end
 
 end
@@ -229,10 +224,12 @@ SCHEDULER.cron '5 0 1 * *' do
     month_end = DateTime.now.prev_month.at_end_of_month
 
     attributes.each_key { |name|
-      gadata = client.query(month_start, month_end, attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort'])
-      sql_data = GaSQLiteMetrics.new(db_con, name)
-      sql_data.create_table!    gadata
-      sql_data.push_data!       "month_#{month_start.strftime('%Y_%m')}", gadata
+      metrics, dimensions, sort = attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort']
+      client.query_iterate!(month_start, month_end, metrics, dimensions, sort) { |gadata|
+        sql_data = GaSQLiteMetrics.new(db_con, name)
+        sql_data.create_table!    gadata
+        sql_data.push_data!       "month_#{month_start.strftime('%Y_%m')}", gadata
+      }
     }
   rescue => e
     puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
@@ -247,52 +244,39 @@ SCHEDULER.cron '5 0 * * *' do
     prev_day = DateTime.now.yesterday
 
     attributes.each_key { |name|
-      gadata = client.query(prev_day, prev_day, attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort'])
-      sql_data = GaSQLiteMetrics.new(db_con, name)
-      sql_data.create_table!    gadata
-      sql_data.push_data!       "daily_#{prev_day.strftime('%Y_%m_%d')}", gadata
+      metrics, dimensions, sort = attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort']
+      client.query_iterate!(prev_day, prev_day, metrics, dimensions, sort) { |gadata|
+        sql_data = GaSQLiteMetrics.new(db_con, name)
+        sql_data.create_table!    gadata
+        sql_data.push_data!       "daily_#{prev_day.strftime('%Y_%m_%d')}", gadata
+      }
     }
   rescue => e
     puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
   end
 end
 
-# Aggregate today GA stats, every 5 min
+# Aggregate today's GA stats
 SCHEDULER.every '30m', :first_in => 0 do |job|
   begin
-    ## No need to store, send to widget instead immediately?
+
+    ## FIXME? No need to store, send to widget instead immediately?
+
     attributes = attributes_yaml.call("today")
     # will query for one single date, today
     today = DateTime.now
 
     attributes.each_key { |name|
-      gadata = client.query(today, today, attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort'])
-      sql_data = GaSQLiteMetrics.new(db_con, name)
-      sql_data.create_table!    gadata
-      sql_data.push_data!       "today", gadata
+      metrics, dimensions, sort = attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort']
+      client.query_iterate!(today, today, metrics, dimensions, sort) { |gadata|
+        sql_data = GaSQLiteMetrics.new(db_con, name)
+        sql_data.create_table!    gadata
+        sql_data.push_data!       "today", gadata
+      }
     }
   rescue => e
+    puts e.backtrace
     puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
   end
 end
 
-### Test loop
-# while true do
-#   begin
-#     ## No need to store, send to widget instead immediately?
-#     attributes = attributes_yaml.call("today")
-#     # will query for one single date, today
-#     today = DateTime.now
-#
-#     attributes.each_key { |name|
-#       gadata = client.query(month_start, month_end, attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort'])
-#       sql_data = GaSQLiteMetrics.new(db_con, name)
-#       sql_data.create_table!    gadata
-#       sql_data.push_data!       "today", gadata
-#     }
-#   rescue => e
-#     puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
-#     require 'pry'
-#     binding.pry
-#   end
-# end

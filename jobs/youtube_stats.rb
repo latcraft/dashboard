@@ -55,46 +55,32 @@ class YTClient
     @youtube_analytics = discovered_api(YOUTUBE_ANALYTICS_API_SERVICE_NAME, YOUTUBE_ANALYTICS_API_VERSION)
   end
 
-  def query(start_date, end_date, metrics, dimensions, sort, page_size = 10000)
+  def query_iterate!(start_date, end_date, metrics, dimensions, sort, page_size = 10000, &block)
     # Retrieve the channel resource for the authenticated user's channel.
-    channels_response = ws!(
+    ws_iterate!(
       :api_method => @youtube.channels.list,
-      :parameters => {
-        :mine => true,
-        :part => 'id',
-      }
-    )
+      :parameters => { :mine => true, :part => 'id', }) do |channels_response|
 
-    stats = nil
-
-    channels_response.items.each do |channel|
-      # Call the Analytics API to retrieve a report. For a list of available
-      # reports, see:
-      # https://developers.google.com/youtube/analytics/v1/channel_reports
-      analytics_response = ws!(
-        :api_method => @youtube_analytics.reports.query,
-        :parameters => {
-          'ids' => "channel==#{channel.id}",
-          'start-date' => start_date.strftime("%Y-%m-%d"),
-          'end-date' => end_date.strftime("%Y-%m-%d"),
-          'metrics' => metrics,
-          'dimensions' => dimensions,
-          'sort' => sort,
-          'start-index' => 1,
-          'max-results' => page_size,
-        }
-      )
-
-      if stats.nil? then
-        stats = analytics_response
-      else
-        # modify in place.
-        # Headers are already there. Will append data.rows only
-        stats.rows = stats.rows.concat(analytics_response.rows)
+        channels_response.items.each do |channel|
+          # Call the Analytics API to retrieve a report. For a list of available
+          # reports, see:
+          # https://developers.google.com/youtube/analytics/v1/channel_reports
+          analytics_response = ws_iterate!(
+            {
+              :api_method => @youtube_analytics.reports.query,
+              :parameters => {
+                'ids' => "channel==#{channel.id}",
+                'start-date' => start_date.strftime("%Y-%m-%d"),
+                  'end-date' => end_date.strftime("%Y-%m-%d"),
+                  'metrics' => metrics,
+                  'dimensions' => dimensions,
+                  'sort' => sort,
+                  'start-index' => 1,
+                  'max-results' => page_size,
+              }
+            }) { |yt_stats| block.call(yt_stats) }
+        end
       end
-    end
-
-    stats
   end
 
 
@@ -119,9 +105,7 @@ class YTClient
     api
   end
 
-  def ws!(request)
-    data = nil
-
+  def ws_iterate!(request, &block)
     loop do
       result = @client.execute!(request)
 
@@ -138,52 +122,26 @@ class YTClient
         raise Google::APIClient::ClientError.new "YT error #{result.data.error['code']}: #{result.data.error['message']}"
       end
 
-      if data.nil? then
-        data = result.data
-      else
-        # modify in place.
-        # Headers are already there. Will append data.rows only
-        data.rows = data.rows.concat(result.data.rows)
-      end
+      block.call(result.data)
 
       break unless result.next_page_token
       request = result.next_page
     end
-
-    data
   end
 
 end
 
 client = YTClient.new(global_opts)
 
-### Test loop
-# while true do
-#   begin
-#     ## No need to store, send to widget instead immediately?
-#
-#     metrics = 'views,comments,favoritesAdded,favoritesRemoved,likes,dislikes,shares'
-#     dimensions = 'video'
-#     sort = '-views'
-#     start_date = DateTime.now.prev_month.at_beginning_of_month
-#     end_date = DateTime.now.prev_month.at_end_of_month
-#
-#     yt_stats = client.query(start_date, end_date, metrics, dimensions, sort, 200)
-#   rescue => e
-#     puts "\e[33mFor the YT check /etc/latcraft.yml for the credentials YML.\n\tError: #{e.message}\e[0m"
-#     require 'pry'
-#     binding.pry
-#   end
-# end
-
 SCHEDULER.every '1h', :first_in => 0 do |job|
   metrics = 'views,comments,favoritesAdded,favoritesRemoved,likes,dislikes,shares'
   dimensions = 'video'
   sort = '-views'
-  start_date = DateTime.now.prev_month.at_beginning_of_month
-  end_date = DateTime.now.prev_month.at_end_of_month
+  start_date = DateTime.now.yesterday
+  end_date = DateTime.now.yesterday
 
-  yt_stats = client.query(start_date, end_date, metrics, dimensions, sort, 10)
-  send_event('top_ten_videos', { videos: yt_stats })
+  client.query_iterate!(start_date, end_date, metrics, dimensions, sort, 10) do |yt_stats|
+    send_event('top_ten_videos', { videos: yt_stats })
+  end
 end
 
