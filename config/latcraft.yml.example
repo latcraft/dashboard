@@ -45,3 +45,13 @@ google_analytics:
   # Metrics obtained for monthly stats
   ga_attributes_monthly_yml:  /etc/latcraft-ga_attributes.yml
 
+# Separate Google API configuration 
+# For instructions etc... see google_analytics section above
+youtube_analytics:
+  application_version: 1.0
+  application_name: ga-latcraft-dashboard
+  service_account_email: <INSERT YOUR VALUE>@developer.gserviceaccount.com
+  client_id: <INSERT YOUR VALUE>.apps.googleusercontent.com
+  key_file: /etc/latcraft-ga-private.p12
+  key_secret: <INSERT YOUR VALUE>
+
