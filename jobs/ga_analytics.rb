@@ -8,16 +8,14 @@ require 'sqlite3'
 require 'yaml'
 
 API_VERSION = 'v3'
-CACHED_API_FILE = "#{ENV["TMPDIR"] || "/tmp/"}.ga-analytics-#{API_VERSION}.cache"
+CACHED_API_FILE = "#{ENV["TMPDIR"] || "/tmp"}/.ga-analytics-#{API_VERSION}.cache"
 
 ## Read Latcraft global configuration
-@global_config = YAML.load_file('/etc/latcraft.yml')
+global_config = YAML.load_file('/etc/latcraft.yml')
 ## Extract GA stats specific configuration
-@global_opts = @global_config['google_analytics'] || {}
+global_opts = global_config['google_analytics'] || {}
 
 class GaQueryClient
-  attr_reader :profileID
-  attr_reader :client
 
  def initialize(opts)
     application_name = opts['application_name']
@@ -63,23 +61,26 @@ class GaQueryClient
 
  ## Query Parameters Summary https://developers.google.com/analytics/devguides/reporting/core/v3/reference#q_summary
  ## Funcation to query google for a set of analytics attributes
- def query(start_date, end_date, dimension, metric, sort)
+ def query_iterate!(start_date, end_date, metrics, dimensions, sort, page_size=1000 ** 3, &block)
    request = {
      :api_method => @analytics.data.ga.get,
      :parameters => {
        'ids' => "ga:" + @profileID,
        'start-date' => start_date.strftime("%Y-%m-%d"),
        'end-date' => end_date.strftime("%Y-%m-%d"),
-       'dimensions' => dimension,
-       'metrics' => metric,
+       'metrics' => metrics,
+       'dimensions' => dimensions,
        'sort' => sort,
+       'start-index' => 1,
+       'max-results' => page_size,
      },
    }
 
-   data = nil
+   page = 0
 
    loop do
-     result = @client.execute(request)
+     result = @client.execute!(request)
+     page += 1
 
      # For some weird reason Google API do not throw exceptions in this endpoint
      # And don't have `.success` kind of status checks
@@ -94,24 +95,16 @@ class GaQueryClient
        raise Google::APIClient::ClientError.new "GA error #{result.data.error['code']}: #{result.data.error['message']}"
      end
 
-     if data.nil? then
-       data = result.data
-     else
-       # modify in place.
-       # Headers are already there. Will append data.rows only
-       data.rows = data.rows.concat(result.data.rows)
-     end
+     block.call(result.data)
 
      # GA api has broken pagination support.
      # Idiomatic Google API service should use next_page_token and next_page
      # HOWEVER, GA v3 does not handle that well (as expected)
      # Thus, in case of paging - we need to do manually by request parameters
      break unless result.data.next_link
-     request[:parameters]['start-index'] = data.rows.length + 1
-     request[:parameters]['max-results'] = data.itemsPerPage
+     request[:parameters]['start-index'] = page * result.data.itemsPerPage + 1
+     request[:parameters]['max-results'] = result.data.itemsPerPage
    end
-
-   data
  end
 
 end
@@ -210,33 +203,33 @@ class GaSQLiteMetrics
 
 end
 
-@db_con = GaSQLiteDB.new(@global_opts)
-@client = GaQueryClient.new(@global_opts)
-
-def attributes_yaml(name)
+db_con = GaSQLiteDB.new(global_opts)
+client = GaQueryClient.new(global_opts)
+attributes_yaml = lambda do |name|
   ## Dimensions and Metrics Reference: https://developers.google.com/analytics/devguides/reporting/core/dimsmets
   ## A single dimension data request to be retrieved from the API is limited to a maximum of 7 dimensions
   ## A single metrics data request to be retrieved from the API is limited to a maximum of 10 metrics
-  ga_attributes_yml = @global_opts["ga_attributes_#{name}_yml"]
+  ga_attributes_yml = global_opts["ga_attributes_#{name}_yml"]
 
   ## Set of dimensions and metrics to query in a file and iterate
   YAML.load_file(ga_attributes_yml)
 end
 
-
 # Aggregate previous day GA stats, on first day, each month, five minutes after midnight
 SCHEDULER.cron '5 0 1 * *' do
   begin
-    attributes = attributes_yaml("monthly")
+    attributes = attributes_yaml.call("monthly")
     # will query for previous month
     month_start = DateTime.now.prev_month.at_beginning_of_month
     month_end = DateTime.now.prev_month.at_end_of_month
 
     attributes.each_key { |name|
-      gadata = @client.query(month_start, month_end, attributes[name]['dimension'], attributes[name]['metric'], attributes[name]['sort'])
-      sql_data = GaSQLiteMetrics.new(@db_con, name)
-      sql_data.create_table!    gadata
-      sql_data.push_data!       "month_#{month_start.strftime('%Y_%m')}", gadata
+      metrics, dimensions, sort = attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort']
+      client.query_iterate!(month_start, month_end, metrics, dimensions, sort) { |gadata|
+        sql_data = GaSQLiteMetrics.new(db_con, name)
+        sql_data.create_table!    gadata
+        sql_data.push_data!       "month_#{month_start.strftime('%Y_%m')}", gadata
+      }
     }
   rescue => e
     puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
@@ -246,55 +239,44 @@ end
 # Aggregate previous day GA stats, every day, five minutes after midnight
 SCHEDULER.cron '5 0 * * *' do
   begin
-    attributes = attributes_yaml("daily")
+    attributes = attributes_yaml.call("daily")
     # will query for one single date, yesterday
     prev_day = DateTime.now.yesterday
 
     attributes.each_key { |name|
-      gadata = @client.query(prev_day, prev_day, attributes[name]['dimension'], attributes[name]['metric'], attributes[name]['sort'])
-      sql_data = GaSQLiteMetrics.new(@db_con, name)
-      sql_data.create_table!    gadata
-      sql_data.push_data!       "daily_#{prev_day.strftime('%Y_%m_%d')}", gadata
+      metrics, dimensions, sort = attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort']
+      client.query_iterate!(prev_day, prev_day, metrics, dimensions, sort) { |gadata|
+        sql_data = GaSQLiteMetrics.new(db_con, name)
+        sql_data.create_table!    gadata
+        sql_data.push_data!       "daily_#{prev_day.strftime('%Y_%m_%d')}", gadata
+      }
     }
   rescue => e
     puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
   end
 end
 
-# Aggregate today GA stats, every 5 min
-SCHEDULER.cron '*/5 * * * *' do
+# Aggregate today's GA stats
+SCHEDULER.every '30m', :first_in => 0 do |job|
   begin
-    ## No need to store, send to widget instead immediately?
-    attributes = attributes_yaml("today")
+
+    ## FIXME? No need to store, send to widget instead immediately?
+
+    attributes = attributes_yaml.call("today")
     # will query for one single date, today
     today = DateTime.now
 
     attributes.each_key { |name|
-      gadata = @client.query(today, today, attributes[name]['dimension'], attributes[name]['metric'], attributes[name]['sort'])
-      sql_data = GaSQLiteMetrics.new(@db_con, name)
-      sql_data.create_table!    gadata
-      sql_data.push_data!       "today", gadata
+      metrics, dimensions, sort = attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort']
+      client.query_iterate!(today, today, metrics, dimensions, sort) { |gadata|
+        sql_data = GaSQLiteMetrics.new(db_con, name)
+        sql_data.create_table!    gadata
+        sql_data.push_data!       "today", gadata
+      }
     }
   rescue => e
+    puts e.backtrace
     puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
   end
 end
 
-### Test loop
-# while true do
-#   begin
-#     ## No need to store, send to widget instead immediately?
-#     attributes = attributes_yaml("today")
-#     # will query for one single date, today
-#     today = DateTime.now
-#
-#     attributes.each_key { |name|
-#       gadata = @client.query(today, today, attributes[name]['dimension'], attributes[name]['metric'], attributes[name]['sort'])
-#       sql_data = GaSQLiteMetrics.new(@db_con, name)
-#       sql_data.create_table!    gadata
-#       sql_data.push_data!       "today", gadata
-#     }
-#   rescue => e
-#     puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
-#   end
-# end
