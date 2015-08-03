@@ -43,13 +43,14 @@ db = SQLite3::Database.new db_path
   'CREATE INDEX IF NOT EXISTS TWEET_DATE ON TWEETS (TEXT);',
 ].each { |sql| db.execute(sql) }
 
-ActiveRecord::Base.establish_connection(
+class Tweet < ActiveRecord::Base
+end
+
+Tweet.establish_connection(
   :adapter => 'sqlite3',
   :database => db_path
 )
 
-class Tweet < ActiveRecord::Base
-end
 
 
 ###########################################################################
