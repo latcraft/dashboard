@@ -27,7 +27,7 @@ class YTClient
   def initialize(opts)
     application_name = opts['application_name']
     application_version = opts['application_version']
-    authorization_oauth2_json = opts['oauth2_json_authorizationy']
+    authorization_oauth2_json = opts['oauth2_json_authorization']
     client_oauth2_json = opts['oauth2_json_client_secret']
 
     @client = Google::APIClient.new(
@@ -127,25 +127,40 @@ end
 
 client = YTClient.new(global_opts)
 
-SCHEDULER.every '2m', :first_in => 0 do |job|
-  month_start = DateTime.now.prev_month.at_beginning_of_month.strftime("%Y-%m-%d")
-  month_end = DateTime.now.prev_month.at_end_of_month.strftime("%Y-%m-%d")
-  
-  dimensions='video'
-  metrics='estimatedMinutesWatched,views,likes,subscribersGained'
-  max_results='10'
-  sort='-estimatedMinutesWatched'
-
-  client.query_iterate!({
-    'start-date' => month_start,
-    'end-date' => month_end,
-    'dimension' => dimensions,
-    'metrics' => metrics,
-    'sort' => sort,
-    'start-index' => 1,
-    'max-results' => max_results
-  }) do |yt_stats|
-    send_event('top_ten_videos', { videos: yt_stats })
+class YoutubeSchedule 
+  def initialize(client)
+    @client = client
   end
 end
 
+class YoutubeTop10N < YoutubeSchedule
+  def call(job)
+    begin
+      month_start = DateTime.now.prev_month.at_beginning_of_month.strftime("%Y-%m-%d")
+      month_end = DateTime.now.prev_month.at_end_of_month.strftime("%Y-%m-%d")
+
+      dimensions='video'
+      metrics='estimatedMinutesWatched,views,likes,subscribersGained'
+      max_results='10'
+      sort='-estimatedMinutesWatched'
+
+      @client.query_iterate!({
+        'start-date' => month_start,
+        'end-date' => month_end,
+        'dimension' => dimensions,
+        'metrics' => metrics,
+        'sort' => sort,
+        'start-index' => 1,
+        'max-results' => max_results
+      }) do |yt_stats|
+        send_event('top_ten_videos', { videos: yt_stats })
+      end
+    rescue => e
+      puts e.backtrace
+      puts "\e[33mFor the Youtube check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
+    end
+  end
+end
+
+SCHEDULER.every '30m', YoutubeTop10N.new(client)
+SCHEDULER.at Time.now, YoutubeTop10N.new(client)

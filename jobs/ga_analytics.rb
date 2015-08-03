@@ -213,68 +213,88 @@ attributes_yaml = lambda do |name|
   YAML.load_file(ga_attributes_yml)
 end
 
-# Aggregate previous day GA stats, on first day, each month, five minutes after midnight
-SCHEDULER.cron '5 0 1 * *' do
-  begin
-    attributes = attributes_yaml.call("monthly")
-    # will query for previous month
-    month_start = DateTime.now.prev_month.at_beginning_of_month
-    month_end = DateTime.now.prev_month.at_end_of_month
-
-    attributes.each_key { |name|
-      metrics, dimensions, sort = attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort']
-      client.query_iterate!(month_start, month_end, metrics, dimensions, sort) { |gadata|
-        sql_data = GaSQLiteMetrics.new(db_con, name)
-        sql_data.create_table!    gadata
-        sql_data.push_data!       "month_#{month_start.strftime('%Y_%m')}", gadata
-      }
-    }
-  rescue => e
-    puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
+class GaSchedule 
+  def initialize(db_con, client, attributes_yaml)
+    @db_con = db_con
+    @client = client
+    @attributes_yaml = attributes_yaml
   end
 end
+
+class GaCronMonthly < GaSchedule
+  def call(job)
+    begin
+      attributes = @attributes_yaml.call("monthly")
+      # will query for previous month
+      month_start = DateTime.now.prev_month.at_beginning_of_month
+      month_end = DateTime.now.prev_month.at_end_of_month
+
+      attributes.each_key { |name|
+        metrics, dimensions, sort = attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort']
+        @client.query_iterate!(month_start, month_end, metrics, dimensions, sort) { |gadata|
+          sql_data = GaSQLiteMetrics.new(@db_con, name)
+          sql_data.create_table!    gadata
+          sql_data.push_data!       "month_#{month_start.strftime('%Y_%m')}", gadata
+        }
+      }
+    rescue => e
+      puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
+    end
+  end
+end
+
+class GaCronDaily < GaSchedule
+  def call(job)
+    begin
+      attributes = @attributes_yaml.call("daily")
+      # will query for one single date, yesterday
+      prev_day = DateTime.now.yesterday
+
+      attributes.each_key { |name|
+        metrics, dimensions, sort = attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort']
+        @client.query_iterate!(prev_day, prev_day, metrics, dimensions, sort) { |gadata|
+          sql_data = GaSQLiteMetrics.new(@db_con, name)
+          sql_data.create_table!    gadata
+          sql_data.push_data!       "daily_#{prev_day.strftime('%Y_%m_%d')}", gadata
+        }
+      }
+    rescue => e
+      puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
+    end
+  end
+end
+
+class GaScheduleToday < GaSchedule
+  def call(job)
+    begin
+      ## FIXME? No need to store, send to widget instead immediately?
+      attributes = @attributes_yaml.call("today")
+      # will query for one single date, today
+      today = DateTime.now
+
+      attributes.each_key { |name|
+        metrics, dimensions, sort = attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort']
+        @client.query_iterate!(today, today, metrics, dimensions, sort) { |gadata|
+          sql_data = GaSQLiteMetrics.new(@db_con, name)
+          sql_data.create_table!    gadata
+          sql_data.push_data!       "today", gadata
+        }
+      }
+    rescue => e
+      puts e.backtrace
+      puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
+    end
+  end
+end
+
+# Aggregate previous day GA stats, on first day, each month, five minutes after midnight
+SCHEDULER.cron '5 0 1 * *', GaCronMonthly.new(db_con, client, attributes_yaml)
+SCHEDULER.in "10m", GaCronMonthly.new(db_con, client, attributes_yaml)
 
 # Aggregate previous day GA stats, every day, five minutes after midnight
-SCHEDULER.cron '5 0 * * *' do
-  begin
-    attributes = attributes_yaml.call("daily")
-    # will query for one single date, yesterday
-    prev_day = DateTime.now.yesterday
-
-    attributes.each_key { |name|
-      metrics, dimensions, sort = attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort']
-      client.query_iterate!(prev_day, prev_day, metrics, dimensions, sort) { |gadata|
-        sql_data = GaSQLiteMetrics.new(db_con, name)
-        sql_data.create_table!    gadata
-        sql_data.push_data!       "daily_#{prev_day.strftime('%Y_%m_%d')}", gadata
-      }
-    }
-  rescue => e
-    puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
-  end
-end
+SCHEDULER.cron '5 0 * * *', GaCronDaily.new(db_con, client, attributes_yaml)
+SCHEDULER.in "15m", GaCronDaily.new(db_con, client, attributes_yaml)
 
 # Aggregate today's GA stats
-SCHEDULER.every '30m', :first_in => 0 do |job|
-  begin
-
-    ## FIXME? No need to store, send to widget instead immediately?
-
-    attributes = attributes_yaml.call("today")
-    # will query for one single date, today
-    today = DateTime.now
-
-    attributes.each_key { |name|
-      metrics, dimensions, sort = attributes[name]['metric'], attributes[name]['dimension'], attributes[name]['sort']
-      client.query_iterate!(today, today, metrics, dimensions, sort) { |gadata|
-        sql_data = GaSQLiteMetrics.new(db_con, name)
-        sql_data.create_table!    gadata
-        sql_data.push_data!       "today", gadata
-      }
-    }
-  rescue => e
-    puts e.backtrace
-    puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
-  end
-end
-
+SCHEDULER.every '30m', GaScheduleToday.new(db_con, client, attributes_yaml)
+SCHEDULER.at Time.now, GaScheduleToday.new(db_con, client, attributes_yaml)
