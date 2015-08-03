@@ -55,7 +55,7 @@ class YTClient
     @youtube_analytics = discovered_api(YOUTUBE_ANALYTICS_API_SERVICE_NAME, YOUTUBE_ANALYTICS_API_VERSION)
   end
 
-  def query_iterate!(start_date, end_date, metrics, dimensions, sort, page_size = 10000, &block)
+  def query_iterate!(parameters, &block)
     # Retrieve the channel resource for the authenticated user's channel.
     ws_iterate!(
       :api_method => @youtube.channels.list,
@@ -65,19 +65,13 @@ class YTClient
           # Call the Analytics API to retrieve a report. For a list of available
           # reports, see:
           # https://developers.google.com/youtube/analytics/v1/channel_reports
-          analytics_response = ws_iterate!(
+          parameters ||= {}
+          parameters['ids'] ||= "channel==#{channel.id}"
+
+          ws_iterate!(
             {
               :api_method => @youtube_analytics.reports.query,
-              :parameters => {
-                'ids' => "channel==#{channel.id}",
-                'start-date' => start_date.strftime("%Y-%m-%d"),
-                  'end-date' => end_date.strftime("%Y-%m-%d"),
-                  'metrics' => metrics,
-                  'dimensions' => dimensions,
-                  'sort' => sort,
-                  'start-index' => 1,
-                  'max-results' => page_size,
-              }
+              :parameters => parameters
             }) { |yt_stats| block.call(yt_stats) }
         end
       end
@@ -133,14 +127,24 @@ end
 
 client = YTClient.new(global_opts)
 
-SCHEDULER.every '1h', :first_in => 0 do |job|
-  metrics = 'views,comments,favoritesAdded,favoritesRemoved,likes,dislikes,shares'
-  dimensions = 'video'
-  sort = '-views'
-  start_date = DateTime.now.yesterday
-  end_date = DateTime.now.yesterday
+SCHEDULER.every '2m', :first_in => 0 do |job|
+  month_start = DateTime.now.prev_month.at_beginning_of_month.strftime("%Y-%m-%d")
+  month_end = DateTime.now.prev_month.at_end_of_month.strftime("%Y-%m-%d")
+  
+  dimensions='video'
+  metrics='estimatedMinutesWatched,views,likes,subscribersGained'
+  max_results='10'
+  sort='-estimatedMinutesWatched'
 
-  client.query_iterate!(start_date, end_date, metrics, dimensions, sort, 10) do |yt_stats|
+  client.query_iterate!({
+    'start-date' => month_start,
+    'end-date' => month_end,
+    'dimension' => dimensions,
+    'metrics' => metrics,
+    'sort' => sort,
+    'start-index' => 1,
+    'max-results' => max_results
+  }) do |yt_stats|
     send_event('top_ten_videos', { videos: yt_stats })
   end
 end
