@@ -213,7 +213,7 @@ attributes_yaml = lambda do |name|
   YAML.load_file(ga_attributes_yml)
 end
 
-class GaSchedule 
+class GaFetchSchedule
   def initialize(db_con, client, attributes_yaml)
     @db_con = db_con
     @client = client
@@ -221,7 +221,7 @@ class GaSchedule
   end
 end
 
-class GaCronMonthly < GaSchedule
+class GaFetchMonthly < GaFetchSchedule
   def call(job)
     begin
       attributes = @attributes_yaml.call("monthly")
@@ -243,7 +243,7 @@ class GaCronMonthly < GaSchedule
   end
 end
 
-class GaCronDaily < GaSchedule
+class GaFetchDaily < GaFetchSchedule
   def call(job)
     begin
       attributes = @attributes_yaml.call("daily")
@@ -264,7 +264,7 @@ class GaCronDaily < GaSchedule
   end
 end
 
-class GaScheduleToday < GaSchedule
+class GaFetchToday < GaFetchSchedule
   def call(job)
     begin
       ## FIXME? No need to store, send to widget instead immediately?
@@ -288,13 +288,61 @@ class GaScheduleToday < GaSchedule
 end
 
 # Aggregate previous day GA stats, on first day, each month, five minutes after midnight
-SCHEDULER.cron '5 0 1 * *', GaCronMonthly.new(db_con, client, attributes_yaml)
-SCHEDULER.in "10m", GaCronMonthly.new(db_con, client, attributes_yaml)
+SCHEDULER.cron '5 0 1 * *', GaFetchMonthly.new(db_con, client, attributes_yaml)
+SCHEDULER.in "10m", GaFetchMonthly.new(db_con, client, attributes_yaml)
 
 # Aggregate previous day GA stats, every day, five minutes after midnight
-SCHEDULER.cron '5 0 * * *', GaCronDaily.new(db_con, client, attributes_yaml)
-SCHEDULER.in "15m", GaCronDaily.new(db_con, client, attributes_yaml)
+SCHEDULER.cron '5 0 * * *', GaFetchDaily.new(db_con, client, attributes_yaml)
+SCHEDULER.in "15m", GaFetchDaily.new(db_con, client, attributes_yaml)
 
 # Aggregate today's GA stats
-SCHEDULER.every '30m', GaScheduleToday.new(db_con, client, attributes_yaml)
-SCHEDULER.at Time.now, GaScheduleToday.new(db_con, client, attributes_yaml)
+SCHEDULER.every '30m', GaFetchToday.new(db_con, client, attributes_yaml)
+SCHEDULER.at Time.now, GaFetchToday.new(db_con, client, attributes_yaml)
+
+class GaWidget
+  def initialize(db_con)
+    @db_con = db_con
+  end
+end
+
+class GaNewUsersPrevMonth < GaWidget
+  def call(job)
+    period_start = DateTime.now.prev_month.at_beginning_of_month
+    new_users = @db_con.execute("select round(1.0 * sum(newUsers) / sum(users) * 100, 1)
+                                from VisitsCount
+                                where ga_period = 'month_#{period_start.strftime('%Y_%m')}'");
+    send_event('ga_new_users_prev_month', { value: new_users })
+  end
+end
+
+class GaUsersToday < GaWidget
+  @previous = 0
+  def call(job)
+    sessions_today = @db_con.execute("select sum(sessions) from VisitCountvisitorType where ga_period = 'today'");
+    send_event('ga_today_sessions', { current: sessions_today, last: @previous })
+    @previous = sessions_today
+  end
+end
+
+class GaUsersGraph < GaWidget
+  def call(job)
+    now = DateTime.now
+    data = @db_con.execute("select cast(hour as integer) ihour, sessions
+                           from HourOfDayMonth 
+                           where ga_period='today' and ihour='#{now.hour}'");
+    points = data.map {|row| { :x => now.to_i, :y => row[1] } }
+
+    send_event('ga_sessions_today_graph', { points: points })
+  end
+end
+
+#
+SCHEDULER.every '5m', GaNewUsersPrevMonth.new(db_con)
+SCHEDULER.at Time.now, GaNewUsersPrevMonth.new(db_con)
+
+ga_users_todays_widget = GaUsersToday.new(db_con)
+SCHEDULER.every '5m', ga_users_todays_widget
+SCHEDULER.at Time.now, ga_users_todays_widget
+
+SCHEDULER.every '5m', GaUsersGraph.new(db_con)
+SCHEDULER.at Time.now, GaUsersGraph.new(db_con)

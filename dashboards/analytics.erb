@@ -1,0 +1,33 @@
+<script type='text/javascript'>
+$(function() {
+  //// These settings override the defaults set in application.coffee. You can do this on a per dashboard basis.
+  //Dashing.gridsterLayout('[{"col":2,"row":1},{"col":1,"row":1},{"col":3,"row":1},{"col":2,"row":2},{"col":3,"row":2},{"col":1,"row":2},{"col":5,"row":1},{"col":4,"row":2},{"col":2,"row":3}]')
+  //Dashing.widget_base_dimensions = [370, 340]
+  Dashing.numColumns = 4
+});
+</script>
+<% content_for :title do %>LatCraft analytics dashboard<% end %>
+<div class="gridster">
+  <ul>
+    <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
+      <div data-id="welcome" data-view="Text" data-title="Latcraft" data-text="This is Latcraft team metrics dashboard." data-moreinfo="Protip: You can drag the widgets around!"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-id="ga_new_users_prev_month" data-view="Meter" data-title="GA new users, %" data-suffix="" data-min="0" data-max="100"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="2">
+      <div data-id="yt_top_10_watched" data-view="List" data-unordered="true" data-title="Top 10 watched videos" data-moreinfo="# minutes watched / # total views"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-id="ga_today_sessions" data-view="Number" data-title="Users today" data-moreinfo="# unique sessions" data-prefix=""></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
+      <div data-id="ga_sessions_today_graph" data-view="Graph" data-title="Sessions current hour" style="background-color:#ff9618"></div>
+    </li>
+  </ul>
+  <center><div style="font-size: 12px">Try this: curl -d '{ "auth_token": "YOUR_AUTH_TOKEN", "text": "Hey, Look what I can do!" }' \http://<%=request.host%>:<%=request.port%>/widgets/welcome</div></center>
+</div>

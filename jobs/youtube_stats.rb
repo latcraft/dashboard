@@ -77,6 +77,20 @@ class YTClient
       end
   end
 
+  def fetch_videos_snippets!(videoIds)
+    meta = {}
+    ws_iterate!(
+      :api_method => @youtube.videos.list,
+      :parameters => {
+        :part => 'snippet',
+        :id => videoIds.join(','),
+      }) do |response|
+        response.items.inject(meta) {|meta, item| meta[item.id] = item; meta}
+    end
+
+    meta
+  end
+
 
   private
   def discovered_api(service, version)
@@ -127,17 +141,17 @@ end
 
 client = YTClient.new(global_opts)
 
-class YoutubeSchedule 
+class YoutubeSchedule
   def initialize(client)
     @client = client
   end
 end
 
-class YoutubeTop10N < YoutubeSchedule
+class YoutubeTop10Watched < YoutubeSchedule
   def call(job)
     begin
-      month_start = DateTime.now.prev_month.at_beginning_of_month.strftime("%Y-%m-%d")
-      month_end = DateTime.now.prev_month.at_end_of_month.strftime("%Y-%m-%d")
+      period_start = DateTime.now.prev_month.at_beginning_of_month.strftime("%Y-%m-%d")
+      period_end = DateTime.now.prev_month.at_end_of_month.strftime("%Y-%m-%d")
 
       dimensions='video'
       metrics='estimatedMinutesWatched,views,likes,subscribersGained'
@@ -145,15 +159,25 @@ class YoutubeTop10N < YoutubeSchedule
       sort='-estimatedMinutesWatched'
 
       @client.query_iterate!({
-        'start-date' => month_start,
-        'end-date' => month_end,
-        'dimension' => dimensions,
+        'start-date' => period_start,
+        'end-date' => period_end,
+        'dimensions' => dimensions,
         'metrics' => metrics,
         'sort' => sort,
         'start-index' => 1,
         'max-results' => max_results
       }) do |yt_stats|
-        send_event('top_ten_videos', { videos: yt_stats })
+
+        meta = @client.fetch_videos_snippets!(yt_stats.rows.map {|video| video[0]})
+
+        top_videos = yt_stats.rows.map {|video|
+          {
+            :label => meta[video[0]].snippet.title,
+            :value => "#{video[1]} / #{video[2]}",
+          }
+        }
+
+        send_event('yt_top_10_watched', { items:  top_videos })
       end
     rescue => e
       puts e.backtrace
@@ -162,5 +186,5 @@ class YoutubeTop10N < YoutubeSchedule
   end
 end
 
-SCHEDULER.every '30m', YoutubeTop10N.new(client)
-SCHEDULER.at Time.now, YoutubeTop10N.new(client)
+SCHEDULER.every '30m', YoutubeTop10Watched.new(client)
+SCHEDULER.at Time.now, YoutubeTop10Watched.new(client)
