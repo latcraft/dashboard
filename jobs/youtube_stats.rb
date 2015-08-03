@@ -15,7 +15,7 @@ global_opts = global_config['youtube_analytics'] || {}
 # These OAuth 2.0 access scopes allow for read-only access to the authenticated
 # user's account for both YouTube Data API resources and YouTube Analytics Data.
 YOUTUBE_SCOPES = ['https://www.googleapis.com/auth/youtube.readonly',
-  'https://www.googleapis.com/auth/yt-analytics.readonly']
+                  'https://www.googleapis.com/auth/yt-analytics.readonly']
 YOUTUBE_API_SERVICE_NAME = 'youtube'
 YOUTUBE_API_VERSION = 'v3'
 YOUTUBE_ANALYTICS_API_SERVICE_NAME = 'youtubeAnalytics'
@@ -27,29 +27,29 @@ class YTClient
   def initialize(opts)
     application_name = opts['application_name']
     application_version = opts['application_version']
-    service_account_email = opts['service_account_email']  # Email of service account
-    key_file = opts['key_file']                            # File containing your private key
-    key_secret = opts['key_secret']                        # Password to unlock private key
+    authorization_oauth2_json = opts['oauth2_json_authorizationy']
+    client_oauth2_json = opts['oauth2_json_client_secret']
 
     @client = Google::APIClient.new(
       :application_name => application_name,
-      :client_id => service_account_email,
       :application_version => application_version)
 
-    ## Load our credentials for the service account
-    key = Google::APIClient::KeyUtils.load_from_pkcs12(key_file, key_secret)
-
-    @client.authorization = Signet::OAuth2::Client.new(
-      :token_credential_uri => 'https://accounts.google.com/o/oauth2/token',
-      :audience => 'https://accounts.google.com/o/oauth2/token',
-      :scope => YOUTUBE_SCOPES,
-      :issuer => service_account_email,
-      :signing_key => key)
+    file_storage = Google::APIClient::FileStorage.new(authorization_oauth2_json)
+    if file_storage.authorization.nil?
+      client_secrets = Google::APIClient::ClientSecrets.load(client_oauth2_json)
+      flow = Google::APIClient::InstalledAppFlow.new(
+        :client_id => client_secrets.client_id,
+        :client_secret => client_secrets.client_secret,
+        :scope => YOUTUBE_SCOPES
+      )
+      @client.authorization = flow.authorize(file_storage)
+    else
+      @client.authorization = file_storage.authorization
+    end
 
     @client.retries = 5
     ## Request a token for our service account
     @client.authorization.fetch_access_token!
-
 
     @youtube = discovered_api(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION)
     @youtube_analytics = discovered_api(YOUTUBE_ANALYTICS_API_SERVICE_NAME, YOUTUBE_ANALYTICS_API_VERSION)
