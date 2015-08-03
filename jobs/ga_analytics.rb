@@ -61,7 +61,7 @@ class GaQueryClient
 
  ## Query Parameters Summary https://developers.google.com/analytics/devguides/reporting/core/v3/reference#q_summary
  ## Funcation to query google for a set of analytics attributes
- def query_iterate!(start_date, end_date, metrics, dimensions, sort, page_size=1000 ** 3, &block)
+ def query_iterate!(start_date, end_date, metrics, dimensions, sort, &block)
    request = {
      :api_method => @analytics.data.ga.get,
      :parameters => {
@@ -71,8 +71,6 @@ class GaQueryClient
        'metrics' => metrics,
        'dimensions' => dimensions,
        'sort' => sort,
-       'start-index' => 1,
-       'max-results' => page_size,
      },
    }
 
