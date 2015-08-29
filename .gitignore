@@ -37,7 +37,5 @@ Gemfile.lock
 
 ## Vagrant working files:
 .vagrant
-latcraft.yml
 history.yml
 
-config/ga-private.p12
