@@ -45,13 +45,22 @@ google_analytics:
   # Metrics obtained for monthly stats
   ga_attributes_monthly_yml:  /etc/latcraft-ga_attributes.yml
 
-# Separate Google API configuration 
+# Separate Google API configuration
 # For instructions etc... see google_analytics section above
 youtube_analytics:
   application_version: 1.0
   application_name: ga-latcraft-dashboard
-  service_account_email: <INSERT YOUR VALUE>@developer.gserviceaccount.com
-  client_id: <INSERT YOUR VALUE>.apps.googleusercontent.com
-  key_file: /etc/latcraft-ga-private.p12
-  key_secret: <INSERT YOUR VALUE>
+  # Client ID installed application secret
+  # How to:
+  #   - Open Google API console - https://code.google.com/apis/console
+  #   - In the `Api & Auth`
+  #      - In `API` enable Youtube APIs v3 & Youtube Analytics API v1
+  #      - In `Credentials` use `Create new Client ID`, `Installed / Native application`,
+  #        `Json` file
+  #   - Path to json file
+  oauth2_json_client_secret: /etc/youtube-analytics-client_secret.json
+  # Client ID authorization happens via browser
+  # And in success case the resulting authorization data is stored locally
+  # in the `oauth2_json_authorization` location.
+  oauth2_json_authorization: /etc/youtube-analytics-authorization.json
 
