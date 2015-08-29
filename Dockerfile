@@ -15,7 +15,6 @@ RUN gem install dashing
 WORKDIR /vagrant
 EXPOSE 3030
 COPY . /vagrant
-COPY ./config/latcraft.yml /etc/latcraft.yml
 VOLUME /vagrant
 
 RUN cd /vagrant && bundle install

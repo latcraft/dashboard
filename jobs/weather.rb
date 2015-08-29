@@ -7,7 +7,7 @@ require 'xmlsimple'
 # Load configuration parameters.
 ###########################################################################
  
-global_config = YAML.load_file('/etc/latcraft.yml')
+global_config = YAML.load_file('./config/latcraft.yml')
 
 woe_id = global_config['yahoo_woe_id'] || "854823" 
 format = global_config['yahoo_weather_format'] || 'c'

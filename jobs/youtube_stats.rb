@@ -8,7 +8,7 @@ require 'google/api_client/auth/installed_app'
 require 'active_support/time'
 
 ## Read Latcraft global configuration
-global_config = YAML.load_file('/etc/latcraft.yml')
+global_config = YAML.load_file('./config/latcraft.yml')
 ## Extract GA stats specific configuration
 global_opts = global_config['youtube_analytics'] || {}
 
@@ -181,7 +181,7 @@ class YoutubeTop10Watched < YoutubeSchedule
       end
     rescue => e
       puts e.backtrace
-      puts "\e[33mFor the Youtube check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
+      puts "\e[33mFor the Youtube check ./config/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
     end
   end
 end

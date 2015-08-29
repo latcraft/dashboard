@@ -11,7 +11,7 @@ require 'htmlentities'
 # Load configuration parameters.
 ###########################################################################
 
-global_config = YAML.load_file('/etc/latcraft.yml')
+global_config = YAML.load_file('./config/latcraft.yml')
 
 search_query = URI::encode(global_config['twitter_query'] || "#latcraft")
 db_path = global_config['twitter_db_path'] || '/var/lib/sqlite/latcraft.db'
@@ -123,7 +123,7 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
     end
 
   rescue Twitter::Error
-    puts "\e[33mFor the twitter widget to work, you need to put in your twitter API keys in /etc/latcraft.yml file.\e[0m"
+    puts "\e[33mFor the twitter widget to work, you need to put in your twitter API keys in ./config/latcraft.yml file.\e[0m"
   end
 end
 

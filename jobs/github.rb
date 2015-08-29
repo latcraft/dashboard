@@ -6,7 +6,7 @@ require 'octokit'
 # Load configuration parameters.
 ###########################################################################
 
-global_config = YAML.load_file('/etc/latcraft.yml')
+global_config = YAML.load_file('./config/latcraft.yml')
 
 ###########################################################################
 # Configure GitHub client.

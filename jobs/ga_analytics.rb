@@ -11,7 +11,7 @@ API_VERSION = 'v3'
 CACHED_API_FILE = "#{ENV["TMPDIR"] || "/tmp"}/.ga-analytics-#{API_VERSION}.cache"
 
 ## Read Latcraft global configuration
-global_config = YAML.load_file('/etc/latcraft.yml')
+global_config = YAML.load_file('./config/latcraft.yml')
 ## Extract GA stats specific configuration
 global_opts = global_config['google_analytics'] || {}
 
@@ -238,7 +238,7 @@ class GaFetchMonthly < GaFetchSchedule
         }
       }
     rescue => e
-      puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
+      puts "\e[33mFor the GA check ./config/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
     end
   end
 end
@@ -259,7 +259,7 @@ class GaFetchDaily < GaFetchSchedule
         }
       }
     rescue => e
-      puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
+      puts "\e[33mFor the GA check ./config/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
     end
   end
 end
@@ -282,7 +282,7 @@ class GaFetchToday < GaFetchSchedule
       }
     rescue => e
       puts e.backtrace
-      puts "\e[33mFor the GA check /etc/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
+      puts "\e[33mFor the GA check ./config/latcraft.yml for the credentials and metrics YML.\n\tError: #{e.message}\e[0m"
     end
   end
 end
