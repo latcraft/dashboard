@@ -11,7 +11,7 @@ require 'htmlentities'
 # Load configuration parameters.
 ###########################################################################
 
-global_config = YAML.load_file('./config/latcraft.yml')
+global_config = YAML.load_file('./config/latcraft.yml') || {}
 
 search_query = URI::encode(global_config['twitter_query'] || "#latcraft")
 db_path = global_config['twitter_db_path'] || '/var/lib/sqlite/latcraft.db'
