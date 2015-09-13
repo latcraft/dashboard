@@ -1,4 +1,5 @@
 class Dashing.Heroes extends Dashing.Widget
   ready: ->
-    # do nothing
-    # TODO: do fade in, fade out
+    @herosElem = $(@node).find('.hero-container')
+    @herosElem.fadeOut =>
+      @herosElem.fadeIn()
