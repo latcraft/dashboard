@@ -21,7 +21,7 @@ global_config = YAML.load_file('./config/latcraft.yml')
 SCHEDULER.every '1m', :first_in => 0 do |job|
   current_time = Time.now.in_time_zone('Europe/Riga')
   schedule = JSON.parse(open(global_config['schedule_data_file']) { |f| f.read })
-  current_month = "#{Date::MONTHNAMES[Date.(today + 15).month]} #{Date.(today + 15).year}"
+  current_month = "#{Date::MONTHNAMES[(Date.today + 15).month]} #{(Date.today + 15).year}"
   next_event = schedule.select { |event| event['month'] == current_month }.first  
   sessions = next_event['schedule']
   sessions.each do |session|
