@@ -22,6 +22,24 @@ def to_min(time_code)
   return (time_code / 100) * 60 + time_code % 100
 end
 
+def type2image(type, title)  
+  base_path = '/assets/events/'
+  if title.include? "Lunch"
+    return base_path + 'dash_lunch.png'
+  elsif title.include? "Opening"
+    return base_path + 'dash_opening.png'
+  elsif title.include? "Final"
+    return base_path + 'dash_finish.png'
+  elsif title.include? "Beer"
+    return base_path + 'dash_party.png'
+  elsif type == "start"
+    return base_path + 'dash_start.png'
+  elsif type == "break"
+    return base_path + 'dash_break.png'
+  end
+  return ''
+end
+
 SCHEDULER.every '1m', :first_in => 0 do |job|
   current_time = Time.now.in_time_zone('Europe/Riga')
   current_min  = current_time.hour * 60 + current_time.min
@@ -33,15 +51,15 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
       :name      => time_slot['name'],
       :title     => time_slot['title'],
       :type      => time_slot['type'],
-      :img       => time_slot['img'].nil? ? '' : 'http://devternity.com/' + time_slot['img']
+      :img       => time_slot['img'].nil? ? type2image(time_slot['type'], time_slot['title']) : 'http://devternity.com/' + time_slot['img']
     }
   end
   valid_slots = time_slots.select { |time_slot| to_min(time_slot[:time_code]) > current_min + 15 }  
   current_slots = valid_slots.select { |slot| slot[:time_code] == valid_slots.first[:time_code] }
   if current_slots && current_slots.size > 0
-    track1 = (current_slots[0]).merge({ :room_name => 'T1' })
-    track2 = (current_slots.size > 1 ? current_slots[1] : current_slots[0]).merge({ :room_name => 'T2' })
-    track3 = (current_slots.size > 2 ? current_slots[2] : current_slots[0]).merge({ :room_name => 'T3' })
+    track1 = (current_slots[0]).merge({ :room_name => 'ROOM 1' })
+    track2 = (current_slots.size > 1 ? current_slots[1] : current_slots[0]).merge({ :room_name => 'ROOM 2' })
+    track3 = (current_slots.size > 2 ? current_slots[2] : current_slots[0]).merge({ :room_name => 'ROOM 3' })
     send_event('track1', session: track1)
     send_event('track2', session: track2)
     send_event('track3', session: track3)
