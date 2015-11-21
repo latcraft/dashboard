@@ -1,0 +1,22 @@
+
+<div class="session-container">  
+  <h2><span data-bind="current_session.time" class="time"></span></h2>     
+  <table style="width: 85%; margin-left: auto; margin-right: auto;">  
+    <tbody>
+      <tr>
+        <td style="width: 20%;" data-insertif="current_session.img">
+          <img data-bind-src="current_session.img">
+        </td>
+        <td>
+          <div data-showif="current_session.name">
+            <h3><span data-bind="current_session.name" class="author"></span></h3>
+            <h3><span data-bind="current_session.title" class="title"></span></h3>
+          </div>
+          <div data-hideif="current_session.name">
+            <h2 style="font-size: 45px"><span data-bind="current_session.title" class="title"></span></h2>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
