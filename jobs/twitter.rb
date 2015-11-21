@@ -41,16 +41,55 @@ db = SQLite3::Database.new db_path
   'CREATE INDEX IF NOT EXISTS TWEET_DATE ON TWEETS (CREATED_AT);',
   'CREATE INDEX IF NOT EXISTS TWEET_DATE ON TWEETS (NAME);',
   'CREATE INDEX IF NOT EXISTS TWEET_DATE ON TWEETS (TEXT);',
+  'CREATE TABLE IF NOT EXISTS MEDIA(ID TEXT, SHORT_URI TEXT, URI TEXT, CREATED_AT TEXT);',
+  'CREATE UNIQUE INDEX IF NOT EXISTS MEDIA_ID ON MEDIA (ID);',
+  'CREATE INDEX IF NOT EXISTS MEDIA_DATE ON MEDIA (CREATED_AT);',
+  # 'CREATE TABLE IF NOT EXISTS FOLLOWERS(ID TEXT, SHORT TEXT, AVATAR TEXT, NAME TEXT, CREATED_AT TEXT);',
 ].each { |sql| db.execute(sql) }
 
 class Tweet < ActiveRecord::Base
 end
+
+class Media < ActiveRecord::Base
+end
+
+# class Follower < ActiveRecord::Base
+# end
 
 Tweet.establish_connection(
   :adapter => 'sqlite3',
   :database => db_path
 )
 
+Media.establish_connection(
+  :adapter => 'sqlite3',
+  :database => db_path
+)
+
+# Follower.establish_connection(
+#   :adapter => 'sqlite3',
+#   :database => db_path
+# )
+
+
+###########################################################################
+# Utilities.
+###########################################################################
+
+def get_tweet_text(tweet)
+  final_text = tweet.text
+  if tweet.media?
+    tweet.media.each { |media| 
+      final_text = final_text.sub(media.uri, "<img src=\"#{media.media_uri}\" />")
+    }
+  end
+  if tweet.uris?
+    tweet.uris.each { |uri| 
+      final_text = final_text.sub(uri.uri, "#{uri.expanded_uri}")
+    }
+  end
+  return final_text
+end
 
 
 ###########################################################################
@@ -67,13 +106,26 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
     if tweets
       tweets.each do |tweet|
         if !Tweet.exists?(id: tweet.id)
-          t = Tweet.new
-          t.ID = tweet.id
+          t            = Tweet.new
+          t.ID         = tweet.id
           t.CREATED_AT = tweet.created_at.in_time_zone('Europe/Riga').iso8601
-          t.CONTENT = tweet.text
-          t.AVATAR = "#{tweet.user.profile_image_url_https}" 
-          t.NAME = tweet.user.name
+          t.CONTENT    = tweet.text
+          t.AVATAR     = "#{tweet.user.profile_image_url_https}" 
+          t.NAME       = tweet.user.name
           t.save
+          if tweet.media? 
+            tweet.media.each_with_index do |media, index|
+              media_id       = "#{tweet.id}_#{index}"
+              if !Media.exists?(id: media_id)
+                m             = Media.new
+                m.ID          = media_id
+                m.CREATED_AT  = tweet.created_at.in_time_zone('Europe/Riga').iso8601
+                m.SHORT_URI   = media.uri
+                m.URI         = media.media_uri
+                m.save
+              end
+            end
+          end
         end
       end
     end
@@ -82,11 +134,12 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
     if tweets
       tweets = tweets.select { |tweet| !tweet.text.start_with?('RT') }.take(18).map do |tweet|
         { 
-          name: tweet.user.name, 
-          avatar: "#{tweet.user.profile_image_url_https}",
-          time: tweet.created_at.in_time_zone('Europe/Riga').strftime("%m-%d %H:%M:%S"), 
-          body: HTMLEntities.new.decode(tweet.text), 
-          # TODO: send also media information to show photos on tweet wall
+          name:      tweet.user.name, 
+          avatar:    "#{tweet.user.profile_image_url_https}",
+          time:      tweet.created_at.in_time_zone('Europe/Riga').strftime("%m-%d %H:%M:%S"), 
+          body:      get_tweet_text(tweet), 
+          media:     tweet.media.map { |media| media.media_uri },
+          has_media: tweet.media?,
         }
       end
       send_event('twitter_mentions', tweets: tweets.sort { |a, b| b[:time] <=> a[:time] })
@@ -117,7 +170,8 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
         tweet_count: row[0] 
       }
     end
-    # TODO: filter own users
+    exclude_users = global_config['twitter_exclude_heroes'] || []
+    top_users = top_users.select { |user| !(exclude_users.include? user['name']) } 
     if !top_users.empty?
       send_event('twitter_top_users', { users: top_users.take(6) })
     end

@@ -14,7 +14,6 @@ class Dashing.Twitter extends Dashing.Widget
 
   nextTweet: =>
     tweets = @get('tweets')
-    # TODO: replace html entities
     if tweets
       @tweetElem.fadeOut =>
         @set 'visible_tweets', tweets.slice(@currentIndex, @currentIndex + 3).concat(tweets.slice(0, Math.max(0, @currentIndex + 3 - tweets.length)))
