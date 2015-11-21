@@ -23,12 +23,14 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
   schedule = JSON.parse(open(global_config['schedule_data_file']) { |f| f.read })
   current_month = "#{Date::MONTHNAMES[(Date.today + 15).month]} #{(Date.today + 15).year}"
   next_event = schedule.select { |event| event['month'] == current_month }.first  
-  sessions = next_event['schedule']
-  sessions.each do |session|
-    if !session['img'].nil? and !session['img'].empty? and !session['img'].start_with?('http')
-      session['img'] = "http://latcraft.lv/" + session['img']
+  if !next_event.nil?
+    sessions = next_event['schedule']
+    sessions.each do |session|
+      if !session['img'].nil? and !session['img'].empty? and !session['img'].start_with?('http')
+        session['img'] = "http://latcraft.lv/" + session['img']
+      end
     end
+    send_event('schedule', sessions: sessions)
   end
-  send_event('schedule', sessions: sessions)
 end
 
