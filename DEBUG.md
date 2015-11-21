@@ -5,7 +5,7 @@ The stream of incoming dashboard data events can be watched through the followin
 
     curl http://dashboard.latcraft.lv:3030/events
 
-To see incoming events in browser's Javascript console just add the following line to any active widget's `ready` method:
+To see incoming events in browser's Javascript console, just add the following line to any active widget's `ready` method:
 
     Dashing.debugMode = true
 

@@ -1,11 +1,13 @@
 LatCraft Event Dashboard
 ==========================
 
-This is an official dashboard for LatCraft community events. Implementation is based on Shopify's Dashing.
+This is an official dashboard for LatCraft community events and conferences. Implementation is based on Shopify's Dashing.
 
 <img src="https://raw.githubusercontent.com/latcraft/dashboard/master/assets/images/preview.png" />
 
 <img src="https://raw.githubusercontent.com/latcraft/dashboard/master/assets/images/preview_aws.png" />
+
+<img src="https://raw.githubusercontent.com/latcraft/dashboard/master/assets/images/preview_devternity.png" />
 
 Run within Vagrant
 ===========================
@@ -20,4 +22,3 @@ Run within Vagrant
 8. <http://192.168.78.11:3030/event>
 
 To run this dashboard in any other environment you can "replay" same commands that appear in `Vagrantfile`'s shell provisioner.
-
