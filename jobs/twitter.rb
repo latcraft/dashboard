@@ -84,6 +84,7 @@ def get_tweet_text(tweet)
   final_text = tweet.text
   if tweet.media?
     media = tweet.media.first
+    #  TODO Handle videos
     media_size = FastImage.size("#{media.media_uri}")
     if !media_size.nil?
       width = media_size[0]
