@@ -2,7 +2,7 @@
 <div class="tweet-container">
   <div data-foreach-item="visible_tweets" class="tweet-item">
     <h3><img data-bind-src='item.avatar' class="tweet-avatar"/><span data-bind='item.name' class="tweet-user"></span> <span data-bind='item.time' class="tweet-time"></span></h3>
-    <p class="tweet-text" data-bind='item.body | raw'></p>
+    <div class="tweet-text" data-bind='item.body | raw'></div>
   </div>
 </div>
 

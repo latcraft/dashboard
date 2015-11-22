@@ -45,6 +45,12 @@ def type2room(type, title)
     return 'CAFE'
   elsif title.include? "Beer"
     return 'OUTSIDE'
+  elsif title.include? "Opening"
+    return 'ROOM '
+  elsif title.include? "Final"
+    return 'ROOM '
+  elsif type == "start"
+    return 'HALL'
   elsif type == "break"
     return 'HALL'
   end
@@ -53,7 +59,7 @@ end
 
 SCHEDULER.every '1m', :first_in => 0 do |job|
   current_time = Time.now.in_time_zone('Europe/Riga')
-  current_min  = current_time.hour * 60 + current_time.min - 420
+  current_min  = current_time.hour * 60 + current_time.min
   schedule     = JSON.parse(open(global_config['devternity_data_file']) { |f| f.read }).first['schedule']
   time_slots   = schedule.map do |time_slot|
     { 
