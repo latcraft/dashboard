@@ -40,9 +40,20 @@ def type2image(type, title)
   return ''
 end
 
+def type2room(type, title)  
+  if title.include? "Lunch"
+    return 'CAFE'
+  elsif title.include? "Beer"
+    return 'OUTSIDE'
+  elsif type == "break"
+    return 'HALL'
+  end
+  return 'ROOM '
+end
+
 SCHEDULER.every '1m', :first_in => 0 do |job|
   current_time = Time.now.in_time_zone('Europe/Riga')
-  current_min  = current_time.hour * 60 + current_time.min
+  current_min  = current_time.hour * 60 + current_time.min - 420
   schedule     = JSON.parse(open(global_config['devternity_data_file']) { |f| f.read }).first['schedule']
   time_slots   = schedule.map do |time_slot|
     { 
@@ -51,15 +62,25 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
       :name      => time_slot['name'],
       :title     => time_slot['title'],
       :type      => time_slot['type'],
+      :room_name => type2room(time_slot['type'], time_slot['title']),
       :img       => time_slot['img'].nil? ? type2image(time_slot['type'], time_slot['title']) : 'http://devternity.com/' + time_slot['img']
     }
   end
   valid_slots = time_slots.select { |time_slot| to_min(time_slot[:time_code]) > current_min + 15 }  
   current_slots = valid_slots.select { |slot| slot[:time_code] == valid_slots.first[:time_code] }
   if current_slots && current_slots.size > 0
-    track1 = (current_slots[0]).merge({ :room_name => 'ROOM 1' })
-    track2 = (current_slots.size > 1 ? current_slots[1] : current_slots[0]).merge({ :room_name => 'ROOM 2' })
-    track3 = (current_slots.size > 2 ? current_slots[2] : current_slots[0]).merge({ :room_name => 'ROOM 3' })
+    track1 = current_slots[0]
+    track2 = current_slots.size > 1 ? current_slots[1].clone : current_slots[0].clone
+    track3 = current_slots.size > 2 ? current_slots[2].clone : current_slots[0].clone
+    if track1[:room_name].start_with? 'ROOM '
+      track1[:room_name] += '1'
+    end
+    if track2[:room_name].start_with? 'ROOM '
+      track2[:room_name] += '2'
+    end
+    if track3[:room_name].start_with? 'ROOM '
+      track3[:room_name] += '3'
+    end
     send_event('track1', session: track1)
     send_event('track2', session: track2)
     send_event('track3', session: track3)

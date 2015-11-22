@@ -84,19 +84,21 @@ def get_tweet_text(tweet)
   final_text = tweet.text
   if tweet.media?
     media = tweet.media.first
-    #  TODO Handle videos
-    media_size = FastImage.size("#{media.media_uri}")
-    if !media_size.nil?
-      width = media_size[0]
-      height = media_size[1]
-      if height > 250
-        width = (width * (250 / height.to_f)).to_i
-        height = 250
+    if media.kind_of? Twitter::Media::Photo
+      media_size = FastImage.size("#{media.media_uri}")
+      if !media_size.nil?
+        width = media_size[0]
+        height = media_size[1]
+        if height > 250
+          width = (width * (250 / height.to_f)).to_i
+          height = 250
+        end
+        final_text = final_text.sub(media.uri, "<div class=\"tweet-image\"><img width=\"#{width}\" height=\"#{height}\" src=\"#{media.media_uri}\" /></div>")
       end
-      final_text = final_text.sub(media.uri, "<div class=\"tweet-image\"><img width=\"#{width}\" height=\"#{height}\" src=\"#{media.media_uri}\" /></div>")
-    else
-      final_text = final_text.sub(media.uri, "")
     end
+    tweet.media.each { |media| 
+      final_text = final_text.sub(media.uri, "#{media.expanded_uri}")
+    }
   end
   if tweet.uris?
     tweet.uris.each { |uri| 

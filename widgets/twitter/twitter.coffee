@@ -20,7 +20,6 @@ class Dashing.Twitter extends Dashing.Widget
         wallLength = 0
         while true
           currentTweet = tweets[@currentIndex]
-          console.log currentTweet
           if currentTweet.image
             wallLength += 2
           else

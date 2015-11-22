@@ -9,4 +9,9 @@ To see incoming events in browser's Javascript console, just add the following l
 
     Dashing.debugMode = true
 
+# Database state
+
+To check database state:
+
+    sqlite3 /var/lib/sqlite/latcraft.db
 
