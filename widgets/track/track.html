@@ -5,7 +5,7 @@
     <tbody>
       <tr>
         <td style="width: 20%;" data-insertif="current_session.img">
-          <img data-bind-src="current_session.img" class="image">
+          <img data-bind-src="current_session.img" data-addclass-speaker-image="current_session.type | equals 'speech'">
         </td>
         <td>
           <div data-showif="current_session.name">
