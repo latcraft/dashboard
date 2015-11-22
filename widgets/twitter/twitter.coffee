@@ -16,6 +16,19 @@ class Dashing.Twitter extends Dashing.Widget
     tweets = @get('tweets')
     if tweets
       @tweetElem.fadeOut =>
-        @set 'visible_tweets', tweets.slice(@currentIndex, @currentIndex + 3).concat(tweets.slice(0, Math.max(0, @currentIndex + 3 - tweets.length)))
-        @currentIndex = (@currentIndex + 3) % tweets.length
+        selectedTweets = []
+        wallLength = 0
+        while true
+          currentTweet = tweets[@currentIndex]
+          console.log currentTweet
+          if currentTweet.image
+            wallLength += 2
+          else
+            wallLength += 1        
+          if wallLength <= 3
+            selectedTweets.push currentTweet
+            @currentIndex = (@currentIndex + 1) % tweets.length
+          else 
+            break
+        @set 'visible_tweets', selectedTweets
         @tweetElem.fadeIn()

@@ -13,3 +13,5 @@ gem 'htmlentities', '4.2.4'
 gem 'octokit', '3.7.1'
 gem 'linkedin', '1.0.0'
 gem 'ruby-trello', '1.1.3'
+gem 'fastimage', '1.8.0'
+

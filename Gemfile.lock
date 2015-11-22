@@ -45,6 +45,8 @@ GEM
     extlib (0.9.16)
     faraday (0.9.1)
       multipart-post (>= 1.2, < 3)
+    fastimage (1.8.0)
+      addressable (~> 2.3, >= 2.3.5)
     google-api-client (0.8.6)
       activesupport (>= 3.2)
       addressable (~> 2.3)
@@ -171,6 +173,7 @@ DEPENDENCIES
   activerecord (= 4.2.0)
   activesupport (= 4.2.0)
   dashing
+  fastimage (= 1.8.0)
   google-api-client (= 0.8.6)
   htmlentities (= 4.2.4)
   json (= 1.8.2)
