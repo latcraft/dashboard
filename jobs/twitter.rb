@@ -86,6 +86,7 @@ def get_tweet_text(tweet)
     media = tweet.media.first
     if media.kind_of? Twitter::Media::Photo
       media_size = FastImage.size("#{media.media_uri}")
+      # TODO: cache size data and maybe cache the file itself
       if !media_size.nil?
         width = media_size[0]
         height = media_size[1]
