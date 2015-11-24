@@ -3,8 +3,10 @@
 // ----------------------------------------------------------------------------
 $background-color:  #eb9c3c;
 
-$title-color:       rgba(255, 255, 255, 0.7);
-$moreinfo-color:    rgba(255, 255, 255, 0.7);
+$text-color:        rgba(0, 0, 0, 0.7);
+$time-color:        rgba(0, 0, 0, 0.5);
+$moreinfo-color:    rgba(0, 0, 0, 0.7);
+$updated-color:     rgba(0, 0, 0, 0.3); 
 
 // ----------------------------------------------------------------------------
 // widget-twitter styles
@@ -25,7 +27,7 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
       margin-bottom: 25px;
 
       .tweet-time {
-        color: $title-color;
+        color: $time-color;
         margin-bottom: 15px;
         font-size: 20px;
       }
@@ -36,11 +38,13 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
 
       .tweet-user {
         padding-left: 10px;
+        color: $text-color;
       }
 
       .tweet-text {
         font-size: 25px;
         width: 100%;
+        color: $text-color;
         overflow-wrap: break-word;
         word-wrap: break-word;
         -ms-word-break: break-all;
@@ -63,7 +67,7 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
   }
 
   .updated-at {
-    color: rgba(0, 0, 0, 0.3);
+    color: $updated-color;
   }
 
   .more-info {
