@@ -80,13 +80,21 @@ Follower.establish_connection(
 # Utilities.
 ###########################################################################
 
+$size_cache = {}
+
+def image_size(uri)
+  if !$size_cache.key?(uri)
+    $size_cache[uri] = FastImage.size(uri)
+  end
+  return $size_cache[uri]
+end
+
 def get_tweet_text(tweet)
   final_text = tweet.text
   if tweet.media?
     media = tweet.media.first
     if media.kind_of? Twitter::Media::Photo
-      media_size = FastImage.size("#{media.media_uri}")
-      # TODO: cache size data and maybe cache the file itself
+      media_size = image_size("#{media.media_uri}")
       if !media_size.nil?
         width = media_size[0]
         height = media_size[1]
@@ -96,14 +104,21 @@ def get_tweet_text(tweet)
         end
         final_text = final_text.sub(media.uri, "<div class=\"tweet-image\"><img width=\"#{width}\" height=\"#{height}\" src=\"#{media.media_uri}\" /></div>")
       end
+    else
+      tweet.media.each { |media| 
+        expanded_uri = "#{uri.expanded_uri}"
+        if (expanded_uri.size < 100) 
+          final_text = final_text.sub(media.uri, expanded_uri)
+        end
+      }
     end
-    tweet.media.each { |media| 
-      final_text = final_text.sub(media.uri, "#{media.expanded_uri}")
-    }
   end
   if tweet.uris?
     tweet.uris.each { |uri| 
-      final_text = final_text.sub(uri.uri, "#{uri.expanded_uri}")
+      expanded_uri = "#{uri.expanded_uri}"
+      if (expanded_uri.size < 100) 
+        final_text = final_text.sub(uri.uri, expanded_uri)
+      end
     }
   end
   return final_text
