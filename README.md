@@ -14,7 +14,7 @@ Run within Vagrant
 
 1. Install VirtualBox with extensions
 2. Install Vagrant
-3. Create `config/latcraft.yml` with proper API keys and secrets.
+3. Create/decrypt configuration files inside the `config` directory with proper API keys and secrets.
 4. `vagrant up`
 5. `vagrant ssh`
 6. `cd /vagrant`
