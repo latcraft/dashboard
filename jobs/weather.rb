@@ -1,16 +1,13 @@
-
 require 'yaml'
+require 'uri'
 require 'net/http'
-require 'xmlsimple'
+require 'json'
 
 ###########################################################################
 # Load configuration parameters.
 ###########################################################################
  
 global_config = YAML.load_file('./config/latcraft.yml')
-
-woe_id = global_config['yahoo_woe_id'] || "854823" 
-format = global_config['yahoo_weather_format'] || 'c'
 
 ###########################################################################
 # Climate icon mapping to Yahoo weather codes.
@@ -46,12 +43,29 @@ end
 ###########################################################################
 
 SCHEDULER.every '5m', :first_in => 0 do |job|
-  http = Net::HTTP.new('weather.yahooapis.com')
-  response = http.request(Net::HTTP::Get.new("/forecastrss?w=#{woe_id}&u=#{format}"))
-  weather_data = XmlSimple.xml_in(response.body, { 'ForceArray' => false })['channel']['item']['condition']
-  weather_location = XmlSimple.xml_in(response.body, { 'ForceArray' => false })['channel']['location']
+  url = [
+    "http://query.yahooapis.com/v1/public/yql?",
+    "&q=select * from weather.forecast where woeid in (",
+    " select woeid from geo.places(1) where text=\"Riga\"",
+    " )",
+    "&format=json",
+    "&env=store://datatables.org/alltableswithkeys"
+  ].join("") 
+
+  url = URI.escape(url)
+  uri = URI.parse(url)
+
+  response = Net::HTTP.get_response(uri)
+  
+  json = JSON.parse(response.body)
+  channel = json['query']['results']['channel']
+  weather_data = channel['item']['condition']
+  weather_location = channel['location']
+  temp_fahrenheit = weather_data['temp']
+  temp_celsius = ((temp_fahrenheit.to_f - 32) * 5/9).to_i
+  
   send_event('weather', { 
-    temp:      "#{weather_data['temp']}&deg;#{format.upcase}",
+    temp:      "#{temp_celsius}&deg;C",
     condition: weather_data['text'],
     title:     "#{weather_location['city']} Weather",
     climacon:  climacon_class(climacon_class_to_code, weather_data['code'])
