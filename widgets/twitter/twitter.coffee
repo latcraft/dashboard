@@ -21,7 +21,7 @@ class Dashing.Twitter extends Dashing.Widget
         while true
           currentTweet = tweets[@currentIndex]
           if currentTweet.image
-            wallLength += 2
+            wallLength += 3
           else
             wallLength += 1        
           if wallLength <= 3
