@@ -46,15 +46,15 @@ def type2room(type, title)
   elsif title.include? "Beer"
     return 'OUTSIDE'
   elsif title.include? "Opening"
-    return 'ROOM '
+    return 'TRACK '
   elsif title.include? "Final"
-    return 'ROOM '
+    return 'TRACK '
   elsif type == "start"
-    return 'HALL'
+    return 'HALLWAY'
   elsif type == "break"
-    return 'HALL'
+    return 'HALLWAY'
   end
-  return 'ROOM '
+  return 'TRACK '
 end
 
 SCHEDULER.every '1m', :first_in => 0 do |job|
@@ -78,13 +78,13 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
     track1 = current_slots[0]
     track2 = current_slots.size > 1 ? current_slots[1].clone : current_slots[0].clone
     track3 = current_slots.size > 2 ? current_slots[2].clone : current_slots[0].clone
-    if track1[:room_name].start_with? 'ROOM '
+    if track1[:room_name].start_with? 'TRACK '
       track1[:room_name] += '1'
     end
-    if track2[:room_name].start_with? 'ROOM '
+    if track2[:room_name].start_with? 'TRACK '
       track2[:room_name] += '2'
     end
-    if track3[:room_name].start_with? 'ROOM '
+    if track3[:room_name].start_with? 'TRACK '
       track3[:room_name] += '3'
     end
     send_event('track1', session: track1)
