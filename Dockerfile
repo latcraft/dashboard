@@ -22,6 +22,5 @@ RUN cd /vagrant && \
 
 EXPOSE 3030
 
-#ENTRYPOINT ["dashing"]
 CMD ["dashing", "start"]
 
