@@ -39,7 +39,7 @@ module Devternity
     if title.include? "Lunch"
       return 'HALLWAYS'
     elsif title.include? "Beer"
-      return 'OUTSIDE'
+      return 'STARGOROD'
     elsif title.include? "Opening"
       return 'TRACK '
     elsif title.include? "Final"
@@ -67,12 +67,19 @@ module Devternity
         :img       => time_slot['img'].nil? ? type2image(time_slot['type'], time_slot['title']) : 'http://devternity.com/' + time_slot['img']
       }
     end
-    valid_slots = time_slots.select { |time_slot| to_min(time_slot[:time_code]) > current_min - 15 }  
-    current_slots = valid_slots.select { |slot| slot[:time_code] == valid_slots.first[:time_code] }
-    # TODO: show next slot dependending on the length of current slot 
-    #       e.g. show next speech after 5 minutes of cofee break start, 
-    #       show next coffee break after 15 minutes of speech start
-    #       show next speech after 30 minutes of lunch start
+    future_slots     = time_slots.select { |time_slot| to_min(time_slot[:time_code]) > current_min }  
+    past_slots       = time_slots.select { |time_slot| to_min(time_slot[:time_code]) <= current_min }
+    past_time_code   = past_slots.size > 0 ? past_slots.last[:time_code] : 0
+    future_time_code = future_slots.size > 0 ? future_slots.first[:time_code] : time_slots.last[:time_code]
+    next_slot_start  = to_min(future_time_code)
+    prev_slot_end    = to_min(past_time_code)
+    slot_duration    = next_slot_start - prev_slot_end
+    passed_mins      = current_min - prev_slot_end
+    time_code        = future_time_code
+    if (slot_duration > 20 && passed_mins < 15) || (slot_duration <= 20 && passed_mins < 5)
+      time_code      = past_time_code
+    end
+    current_slots    = time_slots.select { |slot| slot[:time_code] == time_code }
     if current_slots && current_slots.size > 0
       track1 = current_slots[0]
       track2 = current_slots.size > 1 ? current_slots[1].clone : current_slots[0].clone
