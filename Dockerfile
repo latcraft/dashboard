@@ -10,6 +10,7 @@ RUN mkdir -p /var/lib/sqlite \
     && touch /var/lib/sqlite/latcraft.db \
 
 RUN gem install dashing
+RUN gem install rspec
 
 WORKDIR /vagrant
 COPY . /vagrant
