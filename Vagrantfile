@@ -21,6 +21,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "shell", inline: 'sudo mkdir -p /var/lib/sqlite', privileged: false
   config.vm.provision "shell", inline: 'sudo touch /var/lib/sqlite/latcraft.db', privileged: false
   config.vm.provision "shell", inline: 'sudo gem install dashing', privileged: false
+  config.vm.provision "shell", inline: 'sudo gem install rspec', privileged: false
   config.vm.provision "shell", inline: 'cd /vagrant/; bundle install', privileged: false
 
 end
