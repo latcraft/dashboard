@@ -53,50 +53,50 @@ module Devternity
   end
   
   def send_schedule_updates(global_config, job, &block)
-    current_time = Time.now.in_time_zone('Europe/Riga')
-    current_min  = current_time.hour * 60 + current_time.min
-    schedule     = JSON.parse(open(global_config['devternity_data_file']) { |f| f.read }).first['program'].find { |e| e['event'] == 'keynotes' }['schedule']
-    time_slots   = schedule.map do |time_slot|
-      { 
-        :time      => time_slot['time'], 
-        :time_code => time_slot['time'].split(':').join('').to_i, 
-        :name      => time_slot['name'],
-        :title     => time_slot['title'],
-        :type      => time_slot['type'],
-        :room_name => type2room(time_slot['type'], time_slot['title']),
-        :img       => time_slot['img'].nil? ? type2image(time_slot['type'], time_slot['title']) : 'http://devternity.com/' + time_slot['img']
-      }
-    end
-    future_slots     = time_slots.select { |time_slot| to_min(time_slot[:time_code]) > current_min }  
-    past_slots       = time_slots.select { |time_slot| to_min(time_slot[:time_code]) <= current_min }
-    past_time_code   = past_slots.size > 0 ? past_slots.last[:time_code] : 0
-    future_time_code = future_slots.size > 0 ? future_slots.first[:time_code] : time_slots.last[:time_code]
-    next_slot_start  = to_min(future_time_code)
-    prev_slot_end    = to_min(past_time_code)
-    slot_duration    = next_slot_start - prev_slot_end
-    passed_mins      = current_min - prev_slot_end
-    time_code        = future_time_code
-    if (slot_duration > 20 && passed_mins < 15) || (slot_duration <= 20 && passed_mins < 5)
-      time_code      = past_time_code
-    end
-    current_slots    = time_slots.select { |slot| slot[:time_code] == time_code }
-    if current_slots && current_slots.size > 0
-      track1 = current_slots[0]
-      track2 = current_slots.size > 1 ? current_slots[1].clone : current_slots[0].clone
-      track3 = current_slots.size > 2 ? current_slots[2].clone : current_slots[0].clone
-      if track1[:room_name].start_with? 'TRACK '
-        track1[:room_name] += '1'
-      end
-      if track2[:room_name].start_with? 'TRACK '
-        track2[:room_name] += '2'
-      end
-      if track3[:room_name].start_with? 'TRACK '
-        track3[:room_name] += '3'
-      end
-      block.call('track1', session: track1)
-      block.call('track2', session: track2)
-      block.call('track3', session: track3)
-    end
+#    current_time = Time.now.in_time_zone('Europe/Riga')
+#    current_min  = current_time.hour * 60 + current_time.min
+#    schedule     = JSON.parse(open(global_config['devternity_data_file']) { |f| f.read }).first['program'].find { |e| e['event'] == 'keynotes' }['schedule']
+#    time_slots   = schedule.map do |time_slot|
+#      { 
+#        :time      => time_slot['time'], 
+#        :time_code => time_slot['time'].split(':').join('').to_i, 
+#        :name      => time_slot['name'],
+#        :title     => time_slot['title'],
+#        :type      => time_slot['type'],
+#        :room_name => type2room(time_slot['type'], time_slot['title']),
+#        :img       => time_slot['img'].nil? ? type2image(time_slot['type'], time_slot['title']) : 'http://devternity.com/' + time_slot['img']
+#      }
+#    end
+#    future_slots     = time_slots.select { |time_slot| to_min(time_slot[:time_code]) > current_min }  
+#    past_slots       = time_slots.select { |time_slot| to_min(time_slot[:time_code]) <= current_min }
+#    past_time_code   = past_slots.size > 0 ? past_slots.last[:time_code] : 0
+#    future_time_code = future_slots.size > 0 ? future_slots.first[:time_code] : time_slots.last[:time_code]
+#    next_slot_start  = to_min(future_time_code)
+#    prev_slot_end    = to_min(past_time_code)
+#    slot_duration    = next_slot_start - prev_slot_end
+#    passed_mins      = current_min - prev_slot_end
+#    time_code        = future_time_code
+#    if (slot_duration > 20 && passed_mins < 15) || (slot_duration <= 20 && passed_mins < 5)
+#      time_code      = past_time_code
+#    end
+#    current_slots    = time_slots.select { |slot| slot[:time_code] == time_code }
+#    if current_slots && current_slots.size > 0
+#      track1 = current_slots[0]
+#      track2 = current_slots.size > 1 ? current_slots[1].clone : current_slots[0].clone
+#      track3 = current_slots.size > 2 ? current_slots[2].clone : current_slots[0].clone
+#      if track1[:room_name].start_with? 'TRACK '
+#        track1[:room_name] += '1'
+#      end
+#      if track2[:room_name].start_with? 'TRACK '
+#        track2[:room_name] += '2'
+#      end
+#      if track3[:room_name].start_with? 'TRACK '
+#        track3[:room_name] += '3'
+#      end
+#      block.call('track1', session: track1)
+#      block.call('track2', session: track2)
+#      block.call('track3', session: track3)
+#    end
   end
   
 end  
