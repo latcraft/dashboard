@@ -5,6 +5,10 @@ Session.vim
 .netrwhist
 *~
 
+*.iml
+*.ipr
+*.iws
+
 *.gem
 *.rbc
 /.config
