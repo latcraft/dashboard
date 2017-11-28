@@ -1,0 +1,14 @@
+[Unit]
+Description=Dashing Dashboard
+After=syslog.target network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/dashboard/
+ExecStart=/usr/local/bin/dashing start -p 80 --pid /var/run/thin.pid
+ExecStop=/usr/local/bin/dashing stop
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target

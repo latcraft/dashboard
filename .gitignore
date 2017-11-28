@@ -8,7 +8,9 @@ Session.vim
 *.iml
 *.ipr
 *.iws
+.idea/
 
+vendor/
 *.gem
 *.rbc
 /.config
@@ -43,3 +45,8 @@ Gemfile.lock
 .vagrant
 history.yml
 
+*.key
+*.tgz
+log/
+tmp/
+.database

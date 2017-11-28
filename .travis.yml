@@ -1,0 +1,17 @@
+sudo: required
+language: ruby
+cache: bundler
+script:
+  - bundle install
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: "./deploy.sh"
+  on:
+    branch: master
+env:
+  global:
+    secure: Q/XJ7iJlCRdV9EI6hY7uuDhAONBqLrsZ0XIKFqp5E1HyeKBm4NyaltUT9gP5ZKWZpRK+2uBa0LTVEccKNT5KI13lSbKrXt6eVYYwHKl0hXmkjuqMd/TbhnU1WA5yr47JS7FJwe1QQGbLt2KCAzdRaQaLiHXVXmavLUDo3vZqMMw=
+notifications:
+  slack:
+    secure: aoxT6eaioY2EqGgxxQYT7Yr2UmlGxbCX023+fj7DDkvqpevZ5uycjHWCucYj7A4DdCRVNFaI8Pt7Fm0Hzya8LpPWlV6xWiJ9pl7dj1yH+HjG7AFUcIKwY+ZA9nXTOC/pvNincq09PFpzwoyO6Op31mc6wU/EH29ZnhEYwN9OGlA=

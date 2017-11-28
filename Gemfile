@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'dashing'
+gem 'tzinfo-data'
 gem 'twitter', '5.14.0'
 gem 'google-api-client', '0.8.6'
 gem 'xml-simple', '1.1.4'
@@ -15,3 +16,4 @@ gem 'linkedin', '1.0.0'
 gem 'ruby-trello', '1.1.3'
 gem 'fastimage', '1.8.0'
 
+gem 'pry-byebug'

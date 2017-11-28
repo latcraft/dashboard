@@ -1,27 +1,20 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 
 RUN apt-get -y -q update && \
     apt-get -y -q upgrade
 
-RUN apt-get -y -q install sqlite3 libsqlite3-dev && \
-    apt-get -y -q install ruby ruby-dev nodejs g++ bundler
+RUN apt-get -y -q install ruby ruby-dev nodejs g++ bundler sqlite3 libsqlite3-dev
 
-RUN mkdir -p /var/lib/sqlite \
-    && touch /var/lib/sqlite/latcraft.db \
+RUN mkdir -p /opt/dashing && \
+    cd /opt/dashing && \
+    gem install dashing && \
+    gem install rspec
 
-RUN gem install dashing
-RUN gem install rspec
-
-WORKDIR /vagrant
-COPY . /vagrant
-
-VOLUME /vagrant
+VOLUME /app
 VOLUME /var/lib/sqlite
 
-RUN cd /vagrant && \
-    bundle install
+WORKDIR /app
 
 EXPOSE 3030
 
-CMD ["dashing", "start"]
-
+CMD ["bash", "-c", "bundle install --path /tmp/bundle && dashing start -P /var/run/thin.pid"]
