@@ -11,8 +11,10 @@ require 'date'
 # Job's body.
 ###########################################################################
 
+r = Random.new
+
 SCHEDULER.every '10s', :first_in => 0 do |job|
   global_config = YAML.load_file('./config/latcraft.yml')
-  send_event('photo' + (1 + rand(6)).to_s, image: global_config['photos'].sample)
+  send_event('photo' + (1 + r.rand(6)).to_s, image: global_config['photos'].sample(random: r))
 end
 
