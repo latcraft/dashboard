@@ -1,7 +1,11 @@
 DevTernity/LatCraft Event Dashboards
 ====================================
 
-This is an official dashboard for LatCraft community events and conferences. Implementation is based on Shopify's Dashing.
+This is the official dashboard for DevTernity conferences and LatCraft community events. Implementation is based on Shopify's Dashing.
+
+<img src="https://raw.githubusercontent.com/latcraft/dashboard/master/assets/images/preview_devternity2_2017.png" />
+
+<img src="https://raw.githubusercontent.com/latcraft/dashboard/master/assets/images/preview_devternity1_2017.png" />
 
 <img src="https://raw.githubusercontent.com/latcraft/dashboard/master/assets/images/preview.png" />
 
