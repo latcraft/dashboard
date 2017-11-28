@@ -2,9 +2,9 @@ sudo: required
 language: ruby
 cache: bundler
 rvm:
-  - 2.2
+- 2.2
 script:
-  - bundle install
+- bundle install
 deploy:
   skip_cleanup: true
   provider: script

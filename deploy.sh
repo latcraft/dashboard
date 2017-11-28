@@ -4,7 +4,7 @@
 SSH="ssh -o StrictHostKeyChecking=no -i $DEPLOY_KEY $DEPLOY_USER@$DEPLOY_HOST"
 
 # Decrypt deployment key
-openssl aes-256-cbc -K $encrypted_eb23f61a30c3_key -iv $encrypted_eb23f61a30c3_iv -in deploy.key.enc -out $DEPLOY_KEY -d
+openssl aes-256-cbc -K $encrypted_0c35eebf403c_key -iv $encrypted_0c35eebf403c_iv -in deploy.key.enc -out $DEPLOY_KEY -d
 chmod 400 $DEPLOY_KEY
 
 # Decrypt configuration
