@@ -27,8 +27,8 @@ $SSH sudo tar -zxvf /tmp/dashboard.tgz --no-same-owner -C /dashboard
 
 # Restart service
 $SSH <<EOF
-  mkdir -p /var/lib/sqlite
-  touch /var/lib/sqlite/latcraft.db
+  sudo mkdir -p /var/lib/sqlite
+  sudo touch /var/lib/sqlite/latcraft.db
   echo ">>>> Stopping service"
   sudo systemctl stop dashing 
   echo ">>>> Installing bundler"
