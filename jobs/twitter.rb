@@ -131,7 +131,7 @@ end
 
 # Save Twitter query result in the database and send it to dashboard.
 ###########################################################################
-SCHEDULER.every '1m', :first_in => 0 do |job|
+SCHEDULER.every '2m', :first_in => 0 do |job|
   begin
 
     # Perform Twitter search for most recent tweets.
