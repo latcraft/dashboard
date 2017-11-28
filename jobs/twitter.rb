@@ -106,7 +106,7 @@ def get_tweet_text(tweet)
       end
     else
       tweet.media.each { |media| 
-        expanded_uri = "#{uri.expanded_uri}"
+        expanded_uri = "#{media.expanded_uri}"
         if (expanded_uri.size < 50) 
           final_text = final_text.sub(media.uri, expanded_uri)
         end
@@ -172,7 +172,11 @@ SCHEDULER.every '2m', :first_in => 0 do |job|
 
     # Send most recent 18 tweets (excluding retweets) to dashboard.
     if tweets
-      tweets = tweets.select { |tweet| !tweet.text.start_with?('RT') }.take(18).map do |tweet|
+      tweets = tweets
+        .select { |tweet| !tweet.text.start_with?('RT') }
+        .select { |tweet| !global_config['twitter_exclude_terms'].any? { |term| tweet.user.name.downcase.include?(term) } }
+        .select { |tweet| !global_config['twitter_exclude_terms'].any? { |term| get_tweet_text(tweet).include?(term) } } 
+        .take(18).map do |tweet|
         { 
           name:      tweet.user.name, 
           avatar:    "#{tweet.user.profile_image_url_https}",
@@ -214,9 +218,6 @@ SCHEDULER.every '1h', :first_in => 0 do |job|
             f.save
           end
         end 
-        # db.execute( "select * from followers;" ) do |row|
-        # TODO: Mark unfollowers as inactive + collect statistics
-        # end
       end
     end
   
