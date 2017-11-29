@@ -1,5 +1,3 @@
-# Place this file in assets/javascripts/
-# Dashing compiles it to JavaScript
 
 class @Cycler
 
