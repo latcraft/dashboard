@@ -16,6 +16,10 @@ $title-color:       rgba(25, 25, 25, 0.7);;
     color: $title-color;
   }
 
+  .date {
+    color: $value-color;
+  }
+
   .time {
     font-size: 60px;
     color: $value-color;
