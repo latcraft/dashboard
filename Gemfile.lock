@@ -68,6 +68,8 @@ GEM
       multi_json (~> 1.11)
       os (~> 0.9)
       signet (~> 0.7)
+    haml (4.0.7)
+      tilt
     hashie (3.5.6)
     hike (1.2.3)
     htmlentities (4.3.4)
@@ -148,6 +150,8 @@ GEM
       rack-test
       sinatra (~> 1.4.0)
       tilt (>= 1.3, < 3)
+    sinatra_cyclist (0.0.3)
+      sinatra
     sprockets (2.10.2)
       hike (~> 1.2)
       multi_json (~> 1.0)
@@ -187,6 +191,7 @@ DEPENDENCIES
   dashing
   fastimage (= 1.8.0)
   google-api-client (= 0.8.6)
+  haml (= 4.0.7)
   htmlentities (= 4.3.4)
   json (= 1.8.2)
   linkedin (= 1.0.0)
@@ -194,6 +199,7 @@ DEPENDENCIES
   pry-byebug
   ruby-trello (= 1.1.3)
   sendgrid (= 1.2.0)
+  sinatra_cyclist (= 0.0.3)
   sqlite3 (= 1.3.10)
   twitter (= 5.14.0)
   tzinfo-data
