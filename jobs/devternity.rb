@@ -88,10 +88,10 @@ module Devternity
         track1[:room_name] += '1'
       end
       if track2[:room_name].start_with? 'TRACK '
-        track2[:room_name] += '2'
+        track2[:room_name] += current_slots.size == 1 ? '1' : '2'
       end
       if track3[:room_name].start_with? 'TRACK '
-        track3[:room_name] += '3'
+        track3[:room_name] += current_slots.size == 1 ? '1' : '3'
       end
       block.call('track1', session: track1)
       block.call('track2', session: track2)
