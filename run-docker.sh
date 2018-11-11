@@ -8,7 +8,7 @@ docker build -t ${IMAGE} .
    (docker container rm -fv ${NAME} || echo "Could not remove ${NAME}")
 
 mkdir -p .database
-touch .database/latcraft.db
+touch .database/twitter.db
 
 docker run -dit \
   -p 3030:3030 \

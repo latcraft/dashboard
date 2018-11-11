@@ -1,3 +1,4 @@
+
 require 'yaml'
 require 'uri'
 require 'net/http'
@@ -7,7 +8,7 @@ require 'json'
 # Load configuration parameters.
 ###########################################################################
  
-global_config = YAML.load_file('./config/latcraft.yml')
+global_config = YAML.load_file('./config/integrations.yml')
 
 ###########################################################################
 # Climate icon mapping to Yahoo weather codes.

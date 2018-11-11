@@ -11,7 +11,7 @@ require 'date'
 # Load configuration parameters.
 ###########################################################################
 
-global_config = YAML.load_file('./config/latcraft.yml')
+global_config = YAML.load_file('./config/integrations.yml')
 
 
 ###########################################################################

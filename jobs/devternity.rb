@@ -105,7 +105,7 @@ include Devternity
 
 if defined? SCHEDULER
   SCHEDULER.every '1m', :first_in => 0 do |job|
-    global_config = YAML.load_file('./config/latcraft.yml')
+    global_config = YAML.load_file('./config/integrations.yml')
     Devternity.send_schedule_updates global_config, job do |eventName, eventData| 
       send_event(eventName, eventData)
     end

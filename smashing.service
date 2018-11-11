@@ -1,12 +1,12 @@
 [Unit]
-Description=Dashing Dashboard
+Description=Smashing Dashboard
 After=syslog.target network.target
 
 [Service]
 Type=simple
 WorkingDirectory=/dashboard/
-ExecStart=/usr/local/bin/dashing start -p 80 --pid /var/run/thin.pid
-ExecStop=/usr/local/bin/dashing stop
+ExecStart=/usr/local/bin/smashing start -p 80 --pid /var/run/thin.pid
+ExecStop=/usr/local/bin/smashing stop
 StandardOutput=journal+console
 StandardError=journal+console
 

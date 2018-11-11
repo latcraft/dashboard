@@ -12,11 +12,11 @@ require 'fastimage'
 # Load configuration parameters.
 ###########################################################################
 
-global_config = YAML.load_file('./config/latcraft.yml') || {}
+global_config = YAML.load_file('./config/integrations.yml') || {}
 
 search_query = URI::encode(global_config['twitter_query'] || "#latcraft")
 accounts = global_config['twitter_accounts'] || [ '@latcraft' ]
-db_path = global_config['twitter_db_path'] || '/var/lib/sqlite/latcraft.db'
+db_path = global_config['twitter_db_path'] || '/var/lib/sqlite/twitter.db'
 
 
 ###########################################################################
@@ -189,7 +189,7 @@ SCHEDULER.every '2m', :first_in => 0 do |job|
     end
 
   rescue Twitter::Error => e
-    puts "\e[33mFor the twitter widget to work, you need to put in your twitter API keys in ./config/latcraft.yml file.\e[0m"
+    puts "\e[33mFor the twitter widget to work, you need to put in your twitter API keys in ./config/integrations.yml file.\e[0m"
     puts "\e[33mError message: #{e.message}\e[0m"
   end
 end
@@ -222,7 +222,7 @@ SCHEDULER.every '1h', :first_in => 0 do |job|
     end
   
   rescue Twitter::Error => e
-    puts "\e[33mFor the twitter widget to work, you need to put in your twitter API keys in ./config/latcraft.yml file.\e[0m"
+    puts "\e[33mFor the twitter widget to work, you need to put in your twitter API keys in ./config/integrations.yml file.\e[0m"
     puts "\e[33mError message: #{e.message}\e[0m"
   end
 end

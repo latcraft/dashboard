@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'dashing'
+gem 'smashing'
 gem 'tzinfo-data'
 gem 'twitter', '5.14.0'
 gem 'google-api-client', '0.8.6'
