@@ -30,12 +30,10 @@ $SSH <<EOF
   sudo mkdir -p /var/lib/sqlite
   sudo touch /var/lib/sqlite/twitter.db
   echo ">>>> Stopping service"
-  sudo systemctl stop dashing 
   sudo systemctl stop smashing 
   echo ">>>> Installing bundler"
   cd /dashboard && bundler install
   echo ">>>> Enabling service"
-  sudo systemctl disable dashing.service
   sudo systemctl disable smashing.service
   sudo systemctl daemon-reload
   sudo systemctl enable /dashboard/smashing.service
