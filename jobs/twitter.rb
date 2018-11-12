@@ -39,26 +39,33 @@ end
 db = SQLite3::Database.new db_path
 
 [
-  'CREATE TABLE IF NOT EXISTS TWEETS(ID TEXT, CONTENT TEXT, AVATAR TEXT, NAME TEXT, CREATED_AT TEXT);',
-  'CREATE UNIQUE INDEX IF NOT EXISTS TWEET_ID ON TWEETS (ID);',
+  'CREATE TABLE IF NOT EXISTS TWEETS(TWEET_ID TEXT, CONTENT TEXT, AVATAR TEXT, NAME TEXT, CREATED_AT TEXT);',
+  'CREATE UNIQUE INDEX IF NOT EXISTS TWEET_ID ON TWEETS (TWEET_ID);',
   'CREATE INDEX IF NOT EXISTS TWEET_DATE ON TWEETS (CREATED_AT);',
   'CREATE INDEX IF NOT EXISTS TWEET_NAME ON TWEETS (NAME);',
   'CREATE INDEX IF NOT EXISTS TWEET_CONTENT ON TWEETS (CONTENT);',
-  'CREATE TABLE IF NOT EXISTS MEDIA(ID TEXT, SHORT_URI TEXT, URI TEXT, WIDTH INTEGER, HEIGHT INTEGER, CREATED_AT TEXT);',
-  'CREATE UNIQUE INDEX IF NOT EXISTS MEDIA_ID ON MEDIA (ID);',
+  'CREATE TABLE IF NOT EXISTS MEDIA(MEDIA_ID TEXT, SHORT_URI TEXT, URI TEXT, WIDTH INTEGER, HEIGHT INTEGER, CREATED_AT TEXT);',
+  'CREATE UNIQUE INDEX IF NOT EXISTS MEDIA_ID ON MEDIA (MEDIA_ID);',
   'CREATE INDEX IF NOT EXISTS MEDIA_DATE ON MEDIA (CREATED_AT);',
-  'CREATE TABLE IF NOT EXISTS FOLLOWERS(ID TEXT, TYPE TEXT, STATUS TEXT, AVATAR TEXT, NAME TEXT, CREATED_AT TEXT, FOLLOWED_AT TEXT);',
-  'CREATE UNIQUE INDEX IF NOT EXISTS FOLLOWER_ID ON FOLLOWERS (ID);',
+  'CREATE TABLE IF NOT EXISTS FOLLOWERS(FOLLOWER_ID TEXT, TYPE TEXT, STATUS TEXT, AVATAR TEXT, NAME TEXT, CREATED_AT TEXT, FOLLOWED_AT TEXT);',
+  'CREATE UNIQUE INDEX IF NOT EXISTS FOLLOWER_ID ON FOLLOWERS (FOLLOWER_ID);',
   'CREATE INDEX IF NOT EXISTS FOLLOWER_DATE ON FOLLOWERS (FOLLOWED_AT);',
 ].each { |sql| db.execute(sql) }
 
-class Tweet < ActiveRecord::Base
+class ApplicationRecord < ActiveRecord::Base
+  self.abstract_class = true
 end
 
-class Media < ActiveRecord::Base
+class Tweet < ApplicationRecord
+  self.primary_key = 'TWEET_ID'
 end
 
-class Follower < ActiveRecord::Base
+class Media < ApplicationRecord
+  self.primary_key = 'MEDIA_ID'
+end
+
+class Follower < ApplicationRecord
+  self.primary_key = 'FOLLOWER_ID'
 end
 
 Tweet.establish_connection(
@@ -141,9 +148,9 @@ SCHEDULER.every '2m', :first_in => 0 do |job|
     # Save all tweets in the database for later query.
     if tweets
       tweets.each do |tweet|
-        if !Tweet.exists?(id: tweet.id)
+        if !Tweet.exists?(TWEET_ID: tweet.id)
           t            = Tweet.new
-          t.ID         = tweet.id
+          t.TWEET_ID   = tweet.id
           t.CREATED_AT = tweet.created_at.in_time_zone('Europe/Riga').iso8601
           t.CONTENT    = tweet.text
           t.AVATAR     = "#{tweet.user.profile_image_url_https}" 
@@ -152,9 +159,9 @@ SCHEDULER.every '2m', :first_in => 0 do |job|
           if tweet.media? 
             tweet.media.each_with_index do |media, index|
               media_id       = "#{tweet.id}_#{index}"
-              if !Media.exists?(id: media_id)
+              if !Media.exists?(MEDIA_ID: media_id)
                 m             = Media.new
-                m.ID          = media_id
+                m.MEDIA_ID    = media_id
                 m.CREATED_AT  = tweet.created_at.in_time_zone('Europe/Riga').iso8601
                 m.SHORT_URI   = media.uri
                 m.URI         = media.media_uri
@@ -198,7 +205,7 @@ end
 
 # Save Twitter followers in the database.
 ###########################################################################
-SCHEDULER.every '1h', :first_in => 0 do |job|
+SCHEDULER.every '30m', :first_in => 0 do |job|
   begin
 
     # Query Twitter for followers.
@@ -207,9 +214,9 @@ SCHEDULER.every '1h', :first_in => 0 do |job|
       if followers
         # Save all followers in the database for later query.
         followers.each do |follower|
-          if !Follower.exists?(id: follower.id)
+          if !Follower.exists?(FOLLOWER_ID: follower.id)
             f             = Follower.new
-            f.ID          = follower.id
+            f.FOLLOWER_ID = follower.id
             f.CREATED_AT  = follower.created_at.in_time_zone('Europe/Riga').iso8601
             f.FOLLOWED_AT = Time.now.in_time_zone('Europe/Riga').iso8601
             f.AVATAR      = "#{follower.profile_image_url_https}" 
