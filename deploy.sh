@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # SSH parameters
 SSH="ssh -o StrictHostKeyChecking=no -i $DEPLOY_KEY $DEPLOY_USER@$DEPLOY_HOST"
 SCP="scp -o StrictHostKeyChecking=no -i $DEPLOY_KEY"
