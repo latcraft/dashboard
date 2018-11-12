@@ -1,1 +1,2 @@
 *.enc binary
+*.ini filter=crypt diff=crypt
