@@ -3,16 +3,18 @@ proxy_intercept_errors on;
 
 
 server {
+
   listen 80;
-  listen [::]:80;
+
   server_name dashboard.devternity.com;
+
   return 301 https://$host$request_uri;
+
 }
 
 server {
 
   listen 443 ssl default;
-  listen [::]:443 ssl default;
 
   server_name dashboard.devternity.com;
 
