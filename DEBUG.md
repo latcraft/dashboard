@@ -7,7 +7,7 @@ The stream of incoming dashboard data events can be watched through the followin
 
 To see incoming events in browser's Javascript console, just add the following line to any active widget's `ready` method:
 
-    Smashing.debugMode = true
+    Dashing.debugMode = true
 
 # Database state
 

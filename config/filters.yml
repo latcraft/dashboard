@@ -1,0 +1,16 @@
+
+twitter_exclude_terms:
+  - poop
+  - sex
+  - drug
+  - fuck
+  - cunt
+
+twitter_exclude_heroes:
+  - codingandrey
+  - aestasit
+  - eduardsi
+  - crazyjooe
+  - cvbk
+  - ilahah
+  - jovchem

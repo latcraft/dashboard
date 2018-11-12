@@ -13,6 +13,7 @@ require 'fastimage'
 ###########################################################################
 
 global_config = YAML.load_file('./config/integrations.yml') || {}
+filter_config = YAML.load_file('./config/filters.yml') || {}
 
 search_query = URI::encode(global_config['twitter_query'] || "#latcraft")
 accounts = global_config['twitter_accounts'] || [ '@latcraft' ]
@@ -174,8 +175,8 @@ SCHEDULER.every '2m', :first_in => 0 do |job|
     if tweets
       tweets = tweets
         .select { |tweet| !tweet.text.start_with?('RT') }
-        .select { |tweet| !global_config['twitter_exclude_terms'].any? { |term| tweet.user.name.downcase.include?(term) } }
-        .select { |tweet| !global_config['twitter_exclude_terms'].any? { |term| get_tweet_text(tweet).include?(term) } } 
+        .select { |tweet| !filter_config['twitter_exclude_terms'].any? { |term| tweet.user.name.downcase.include?(term) } }
+        .select { |tweet| !filter_config['twitter_exclude_terms'].any? { |term| get_tweet_text(tweet).include?(term) } } 
         .take(18).map do |tweet|
         { 
           name:      tweet.user.name, 
@@ -225,6 +226,7 @@ SCHEDULER.every '1h', :first_in => 0 do |job|
     puts "\e[33mFor the twitter widget to work, you need to put in your twitter API keys in ./config/integrations.yml file.\e[0m"
     puts "\e[33mError message: #{e.message}\e[0m"
   end
+
 end
 
 
@@ -251,6 +253,7 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
   rescue Exception => e
     puts "\e[33mError message: #{e.message}\e[0m"
   end
+
 end
 
 
@@ -269,7 +272,7 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
         tweet_count: row[0] 
       }
     end
-    exclude_users = global_config['twitter_exclude_heroes'] || []
+    exclude_users = filter_config['twitter_exclude_heroes'] || []
     top_users = top_users.select { |user| !(exclude_users.include? user['name']) } 
     if !top_users.empty?
       send_event('twitter_top_users', { users: top_users.take(6) })
@@ -278,5 +281,6 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
   rescue Exception => e
     puts "\e[33mError message: #{e.message}\e[0m"
   end
+
 end
 

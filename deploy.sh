@@ -43,7 +43,7 @@ $SSH <<EOF
   echo ">>>> Sleeping"
   sleep 20
   echo ">>>> Showing logs"
-  sudo journalctl -xn --no-pager -u smashing.service
+  sudo journalctl -xn --no-pager --since "1 hour ago" -u smashing.service
   echo ">>>> Checking status"
   sudo systemctl -q is-active smashing
 EOF
