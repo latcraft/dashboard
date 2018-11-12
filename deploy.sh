@@ -18,8 +18,9 @@ decrypt config/integrations.yml
 rm -rf dashboard.tgz
 tar -czf dashboard.tgz ./config ./assets ./dashboards ./jobs ./public ./widgets ./config.ru ./Gemfile* ./smashing.service
 
-# Copy artifact to remote host
+# Copy artifacts to remote host
 scp -o StrictHostKeyChecking=no -i $DEPLOY_KEY dashboard.tgz $DEPLOY_USER@$DEPLOY_HOST:/tmp
+scp -o StrictHostKeyChecking=no -i $DEPLOY_KEY smashing.nginx $DEPLOY_USER@$DEPLOY_HOST:/tmp
 
 # Deploy dashboard code
 $SSH sudo mkdir -p /dashboard/config
@@ -29,6 +30,7 @@ $SSH sudo tar -zxvf /tmp/dashboard.tgz --no-same-owner -C /dashboard
 $SSH <<EOF
   sudo mkdir -p /var/lib/sqlite
   sudo touch /var/lib/sqlite/twitter.db
+  yes | sudo cp -rf /tmp/smashing.nginx /etc/nginx/sites-available/default
   echo ">>>> Stopping service"
   sudo systemctl stop smashing 
   echo ">>>> Installing bundler"
@@ -40,6 +42,7 @@ $SSH <<EOF
   sudo systemctl daemon-reload
   echo ">>>> Restarting service"
   sudo systemctl start smashing 
+  sudo systemctl restart nginx
   echo ">>>> Sleeping"
   sleep 30
   echo ">>>> Showing logs"

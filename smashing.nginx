@@ -1,0 +1,13 @@
+
+proxy_intercept_errors on;
+
+server {
+
+  listen 80 default_server;
+  listen [::]:80 default_server;
+
+  location / {
+    proxy_pass http://localhost:3030;
+  }
+
+}
