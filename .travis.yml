@@ -4,6 +4,7 @@ cache: bundler
 rvm:
 - 2.2
 script:
+- set -e
 - bundle install
 deploy:
   skip_cleanup: true
