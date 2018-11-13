@@ -47,9 +47,10 @@ rm -rf ./cloudflare.ini
 $SSH <<EOF
   sudo mkdir -p /var/lib/sqlite
   sudo touch /var/lib/sqlite/twitter.db
-  yes | sudo cp -rf /tmp/smashing.nginx /etc/nginx/sites-available/default
   echo ">>>> Stopping service"
   sudo systemctl stop smashing 
+  sudo apt-get -y install nginx
+  yes | sudo cp -rf /tmp/smashing.nginx /etc/nginx/sites-available/default
   echo ">>>> Installing bundler"
   cd /dashboard && bundler install
   echo ">>>> Enabling service"
