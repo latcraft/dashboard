@@ -14,8 +14,13 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
   background-color: $background-color;
 
   .title {
+    font-size: 60px;
     color: $title-color;
   }
+
+  .text {
+     font-size: 60px;
+  } 
 
   .more-info {
     color: $moreinfo-color;
@@ -25,8 +30,8 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
     color: rgba(255, 255, 255, 0.7);
   }
 
-
   &.large h3 {
     font-size: 65px;
   }
+
 }

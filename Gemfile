@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 gem 'smashing'
 gem 'tzinfo-data'
 gem 'pry-byebug'
+gem 'firebase'
 
 gem 'twitter', '6.2.0'
 gem 'xml-simple', '1.1.4'
