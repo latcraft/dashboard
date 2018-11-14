@@ -1,40 +1,38 @@
 
-require 'net/http'
-require 'json'
 require 'yaml'
+require 'koala'
 
 ###########################################################################
 # Load configuration parameters.
 ###########################################################################
 
 global_config = YAML.load_file('./config/integrations.yml') || {}
-facebook_graph_username = URI::encode(global_config['facebook_page'] || "devternity")
+fb_page = URI::encode(global_config['facebook_page'] || "DevTernity")
+$graph = Koala::Facebook::API.new(global_config['facebook_access_token'], global_config['facebook_app_secret'])
+
+def page_info(page_name)
+  info = $graph.get_object(
+    page_name,
+    { fields: ['about', 'fan_count', 'new_like_count', 'rating_count', 'country_page_likes', 'talking_about_count', 'were_here_count', 'checkins', 'cover', 'ratings', 'published_posts'] },
+    { :use_ssl => true }
+  )
+  {
+    likes: info['fan_count'],
+    checkins: info['checkins'],
+    were_here: info['were_here_count'],
+    talking_about: info['talking_about_count']
+  }
+end
 
 ###########################################################################
 # Job's schedules.
 ###########################################################################
 
 SCHEDULER.every '1m', :first_in => 0 do |job|
-  http = Net::HTTP.new("graph.facebook.com")
-  response = http.request(Net::HTTP::Get.new("/#{facebook_graph_username}"))
-  if response.code != "200"
-    puts "facebook graph api error (status-code: #{response.code})\n#{response.body}"
-  else 
-    data = JSON.parse(response.body)
-    if data['likes']
-      if defined?(send_event) 
-        send_event('facebook_likes', current: data['likes'])
-        send_event('facebook_checkins', current: data['checkins'])
-        send_event('facebook_were_here_count', current: data['were_here_count'])
-        send_event('facebook_talking_about_count', current: data['talking_about_count'])
-      else
-        printf "Facebook likes: %d, checkins: %d, were_here_count: %d, talking_about_count: %d\n",
-          data['likes'],
-          data['checkins'],
-          data['were_here_count'],
-          data['talking_about_count']
-      end
-    end
-  end
+  data = page_info(fb_page)
+  send_event('facebook_likes', current: data[:likes])
+  send_event('facebook_checkins', current: data[:checkins])
+  send_event('facebook_were_here_count', current: data[:were_here])
+  send_event('facebook_talking_about_count', current: data[:talking_about])
 end
 
