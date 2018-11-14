@@ -200,6 +200,7 @@ SCHEDULER.every '2m', :first_in => 0 do |job|
     puts "\e[33mFor the twitter widget to work, you need to put in your twitter API keys in ./config/integrations.yml file.\e[0m"
     puts "\e[33mError message: #{e.message}\e[0m"
   end
+
 end
 
 
