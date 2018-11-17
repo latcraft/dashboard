@@ -6,6 +6,14 @@ twitter_exclude_terms:
   - fuck
   - cunt
 
+facebook_exclude_terms:
+  - poop
+  - sex
+  - drug
+  - fuck
+  - cunt
+  - burnt
+
 twitter_exclude_heroes:
   - codingandrey
   - aestasit
