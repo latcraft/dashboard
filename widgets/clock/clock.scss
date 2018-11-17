@@ -2,8 +2,6 @@
 // Sass declarations
 // ----------------------------------------------------------------------------
 $background-color:  #47bbb3;
-$value-color:       #231F20;
-$title-color:       rgba(25, 25, 25, 0.7);;
 
 // ----------------------------------------------------------------------------
 // Widget-clock styles
@@ -12,17 +10,12 @@ $title-color:       rgba(25, 25, 25, 0.7);;
 
   background-color: $background-color;
 
-  .title { 
-    color: $title-color;
-  }
-
   .date {
-    color: $value-color;
   }
 
   .time {
     font-size: 60px;
-    color: $value-color;
+    font-weight: bold;
   }
 
 }
