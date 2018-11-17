@@ -44,7 +44,7 @@ def page_ratings(page_name)
       }
     }
   ratings.each { |r| 
-    r['time'] = r['created_time'].in_time_zone('Europe/Riga').strftime("%Y-%m-%d %H:%M:%S") 
+    r['time'] = r['created_time'].in_time_zone('Europe/Riga').strftime("%Y-%m-%d") 
   }
   {
     ratings: ratings
