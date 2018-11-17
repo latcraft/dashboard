@@ -11,9 +11,11 @@ require 'firebase'
 ###########################################################################
 
 $global_config = YAML.load_file('./config/integrations.yml')
-$firebase_config = JSON.parse(open($global_config['firebase_sales_config']) { |f| f.read })
+$firebase_json = File.open($global_config['firebase_sales_config']).read
+$firebase_config = JSON.parse($firebase_json)
+$base_url = "https://#{$firebase_config['project_id']}.firebaseio.com/"
 
-DT2018_PRODUCTS = ['DT_RIX_18']
+DT2018_PRODUCTS = [ 'DT_RIX_18' ]
 DT2018_DAY1_KEYNOTE = 'Main Day Pass'
 DT2018_ERROR_TICKETS_EVENT = 'Error: Tickets data error'
 
@@ -37,23 +39,25 @@ class DevternityFirebaseStats
 
   attr_reader :client
 
-  def initialize(opts)
+  def initialize(opts, auth_token)
     base_url = "https://#{opts['project_id']}.firebaseio.com/"
-    auth_token = opts['auth_token']
     @client = Firebase::Client.new(base_url, auth_token)
   end
 
   def call(job)
     begin
+
       capacities = WORKSHOP_CAPACITIES.merge({ "Main Hall" => MAIN_DAY_CAPACITY })
       sales = counts()
       event_stats = sales[:tickets]
         .sort_by {|name, count| -count}
         .map {|name, count| { label: name + remaining(capacities, count), value: count }}
-      send_event('tickets', { title: "#{sales[:total]} tickets purchased", moreinfo: "Total #{sales[:total]}", items: event_stats })
       day1Tickets = sales[:tickets][DT2018_DAY1_KEYNOTE]
+
+      send_event('tickets', { title: "#{sales[:total]} tickets purchased", moreinfo: "Total #{sales[:total]}", items: event_stats })
       send_event('keynotes', { max: MAIN_DAY_CAPACITY, moreinfo: "#{day1Tickets}/#{MAIN_DAY_CAPACITY}", value: day1Tickets })
       send_event('workshops', { max: WORKSHOP_CAPACITY, moreinfo: "#{sales[:total] - day1Tickets}/#{WORKSHOP_CAPACITY}", value: sales[:total] - day1Tickets })
+
     end
   rescue => e
     puts e.backtrace
@@ -69,8 +73,8 @@ class DevternityFirebaseStats
   end
 
   def raw_applications
-    response = @client.get('applications')
-    raise "DT error #{response.code}" unless response.success?
+    response = @client.get('applications', {})
+    raise "DT error #{response.code} (#{response.body})" unless response.success?
     response.body
   end
 
@@ -117,6 +121,6 @@ end
 # Job's schedules.
 ###########################################################################
 
-SCHEDULER.every '15m', :first_in => 0 do |job| 
-  DevternityFirebaseStats.new($firebase_config).call(job)
+SCHEDULER.every '1m', :first_in => 0 do |job| 
+  DevternityFirebaseStats.new($firebase_config, $firebase_json).call(job)
 end
