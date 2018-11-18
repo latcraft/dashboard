@@ -16,6 +16,8 @@ function decrypt() {
   openssl enc -aes-256-cbc -pass env:SECRET_PASSWORD -d -a -in "${filename}" -out "${filename}.dec" && rm -f "${filename}" && mv "${filename}.dec" "${filename}"
 } 
 decrypt config/integrations.yml
+decrypt config/firebase-voting.json 
+decrypt config/firebase-sales.json
 
 # Create dashboard artifact 
 rm -rf dashboard.tgz
@@ -26,6 +28,7 @@ $SCP dashboard.tgz $DEPLOY_USER@$DEPLOY_HOST:/tmp
 $SCP smashing.nginx $DEPLOY_USER@$DEPLOY_HOST:/tmp
 rm -rf dashboard.tgz
 rm -rf config/integrations.yml
+rm -rf config/*.json
 
 # Deploy dashboard code
 $SSH sudo mkdir -p /dashboard/config
