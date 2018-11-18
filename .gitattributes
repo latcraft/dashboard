@@ -1,2 +1,4 @@
 *.enc binary
 *.ini filter=crypt diff=crypt
+connect.sh filter=crypt diff=crypt
+
