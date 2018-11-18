@@ -6,8 +6,7 @@ After=syslog.target network.target
 Type=simple
 Environment=SINATRA_ACTIVESUPPORT_WARNING=false
 WorkingDirectory=/dashboard/
-ExecStart=/usr/local/bin/smashing start -p 3030 --pid /var/run/thin.pid
-ExecStop=/usr/local/bin/smashing stop
+ExecStart=/usr/local/bin/smashing start -p 3030
 StandardOutput=journal+console
 StandardError=journal+console
 

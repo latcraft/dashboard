@@ -3,7 +3,7 @@ require 'dashing'
 
 configure do
   set :auth_token, 'NOT_PROTECTED'
-  set :default_dashboard, 'event'
+  set :default_dashboard, 'cycle'
   helpers do
     def protected!
     end
