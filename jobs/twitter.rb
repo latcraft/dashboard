@@ -68,21 +68,6 @@ class Follower < ApplicationRecord
   self.primary_key = 'FOLLOWER_ID'
 end
 
-Tweet.establish_connection(
-  :adapter => 'sqlite3',
-  :database => db_path
-)
-
-Media.establish_connection(
-  :adapter => 'sqlite3',
-  :database => db_path
-)
-
-Follower.establish_connection(
-  :adapter => 'sqlite3',
-  :database => db_path
-)
-
 
 ###########################################################################
 # Utilities.
@@ -142,6 +127,9 @@ end
 SCHEDULER.every '2m', :first_in => 0 do |job|
   begin
 
+    Tweet.establish_connection(:adapter => 'sqlite3', :database => db_path)
+    Media.establish_connection(:adapter => 'sqlite3', :database => db_path)
+
     # Perform Twitter search for most recent tweets.
     tweets = twitter.search("#{search_query}", { :result_type => 'recent', :count => 100 })
 
@@ -197,8 +185,10 @@ SCHEDULER.every '2m', :first_in => 0 do |job|
     end
 
   rescue Twitter::Error => e
-    puts "\e[33mFor the twitter widget to work, you need to put in your twitter API keys in ./config/integrations.yml file.\e[0m"
     puts "\e[33mError message: #{e.message}\e[0m"
+  ensure
+    Tweet.remove_connection()
+    Media.remove_connection()
   end
 
 end
@@ -208,6 +198,8 @@ end
 ###########################################################################
 SCHEDULER.every '30m', :first_in => 0 do |job|
   begin
+
+    Follower.establish_connection(:adapter => 'sqlite3', :database => db_path)
 
     # Query Twitter for followers.
     accounts.each do |account|
@@ -231,8 +223,9 @@ SCHEDULER.every '30m', :first_in => 0 do |job|
     end
   
   rescue Twitter::Error => e
-    puts "\e[33mFor the twitter widget to work, you need to put in your twitter API keys in ./config/integrations.yml file.\e[0m"
     puts "\e[33mError message: #{e.message}\e[0m"
+  ensure 
+    Follower.remove_connection() 
   end
 
 end

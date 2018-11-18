@@ -9,7 +9,7 @@ $photo_position = 0
 $photo_index = 0
 
 $global_config = YAML.load_file('./config/photos.yml') || {}
-$photos = $global_config['photos'] || [ '/assets/splash.png' ]
+$photos = $global_config['photos'] || [ '/assets/splash2018.png' ]
 
 def send_photo_update()
   next_position = 'photo' + (1 + ($photo_position % 5)).to_s

@@ -10,8 +10,7 @@ require 'firebase'
 # Load configuration parameters.
 ###########################################################################
 
-$global_config = YAML.load_file('./config/integrations.yml')
-$firebase_json = File.open($global_config['firebase_voting_config']).read
+$firebase_json = File.open('./config/firebase-voting.json') { |file| file.read }
 $firebase_config = JSON.parse($firebase_json)
 $base_url = "https://#{$firebase_config['project_id']}.firebaseio.com/"
 $firebase_client = Firebase::Client.new($base_url, $firebase_json)
