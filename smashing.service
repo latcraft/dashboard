@@ -9,6 +9,7 @@ WorkingDirectory=/dashboard/
 ExecStart=/usr/local/bin/smashing start -p 3030
 StandardOutput=journal+console
 StandardError=journal+console
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target

@@ -1,3 +1,4 @@
+# encoding: utf-8
 
 require 'yaml'
 require 'uri'
@@ -44,6 +45,7 @@ end
 ###########################################################################
 
 SCHEDULER.every '5m', :first_in => 0 do |job|
+
   url = [
     "http://query.yahooapis.com/v1/public/yql?",
     "&q=select * from weather.forecast where woeid in (",
@@ -71,4 +73,5 @@ SCHEDULER.every '5m', :first_in => 0 do |job|
     title:     "#{weather_location['city']} Weather",
     climacon:  climacon_class(climacon_class_to_code, weather_data['code'])
   })
+
 end
