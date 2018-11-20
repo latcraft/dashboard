@@ -86,8 +86,10 @@ end
 def get_tweet_text(tweet)
   final_text = tweet.text
   if tweet.media?
+    puts tweet.media.inspect
     media = tweet.media.first
-    if media.kind_of? Twitter::Media::Photo
+    puts media.media_uri
+    if (media.kind_of?(Twitter::Media::Photo)) || (media.kind_of?(Twitter::Media::AnimatedGif))
       media_size = image_size("#{media.media_uri}")
       if !media_size.nil?
         width = media_size[0]
