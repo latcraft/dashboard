@@ -34,6 +34,7 @@ rm -rf config/*.json
 # TODO: if does not exist or expired
 # $SSH sudo systemctl stop nginx
 decrypt ./cloudflare.ini
+$SSH sudo systemctl stop nginx
 $SSH sudo mkdir -p /home/$DEPLOY_USER/.secrets/cerbot
 $SSH sudo chown $DEPLOY_USER:$DEPLOY_USER /home/$DEPLOY_USER/.secrets
 $SSH sudo chown $DEPLOY_USER:$DEPLOY_USER /home/$DEPLOY_USER/.secrets/cerbot
