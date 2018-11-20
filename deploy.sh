@@ -31,9 +31,8 @@ rm -rf config/integrations.yml
 rm -rf config/*.json
 
 # Create or renew certificate
-# $SSH sudo systemctl stop nginx
 decrypt ./cloudflare.ini
-$SSH sudo systemctl stop nginx
+$SSH sudo systemctl stop nginx || true
 $SSH sudo mkdir -p /home/$DEPLOY_USER/.secrets/certbot
 $SSH sudo chown $DEPLOY_USER:$DEPLOY_USER /home/$DEPLOY_USER/.secrets
 $SSH sudo chown $DEPLOY_USER:$DEPLOY_USER /home/$DEPLOY_USER/.secrets/certbot
