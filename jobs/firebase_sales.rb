@@ -56,8 +56,8 @@ class DevternityFirebaseStats
     day1Tickets = sales[:tickets][DT2018_DAY1_KEYNOTE]
 
     send_event('tickets', { title: "#{sales[:total]} tickets purchased", moreinfo: "Total #{sales[:total]}", items: event_stats })
-    send_event('keynotes', { max: MAIN_DAY_CAPACITY, moreinfo: "#{day1Tickets}/#{MAIN_DAY_CAPACITY}", value: day1Tickets })
-    send_event('workshops', { max: WORKSHOP_CAPACITY, moreinfo: "#{sales[:total] - day1Tickets}/#{WORKSHOP_CAPACITY}", value: sales[:total] - day1Tickets })
+    # send_event('keynotes', { max: MAIN_DAY_CAPACITY, moreinfo: "#{day1Tickets}/#{MAIN_DAY_CAPACITY}", value: day1Tickets })
+    # send_event('workshops', { max: WORKSHOP_CAPACITY, moreinfo: "#{sales[:total] - day1Tickets}/#{WORKSHOP_CAPACITY}", value: sales[:total] - day1Tickets })
 
   end
 
