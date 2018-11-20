@@ -38,7 +38,7 @@ $SSH sudo mkdir -p /home/$DEPLOY_USER/.secrets/cerbot
 $SSH sudo chown $DEPLOY_USER:$DEPLOY_USER /home/$DEPLOY_USER/.secrets
 $SSH sudo chown $DEPLOY_USER:$DEPLOY_USER /home/$DEPLOY_USER/.secrets/cerbot
 $SCP cloudflare.ini $DEPLOY_USER@$DEPLOY_HOST:/home/$DEPLOY_USER/.secrets/cerbot
-# $SSH sudo docker run --rm --name certbot -it -p 80:80 -p 443:443 -v /etc/letsencrypt:/etc/letsencrypt/ -v /var/log/letsencrypt:/var/log/letsencrypt -v /home/$DEPLOY_USER/.secrets/certbot:/secrets certbot/dns-cloudflare certonly --dns-cloudflare --dns-cloudflare-credentials /secrets/cloudflare.ini --dns-cloudflare-propagation-seconds 60 -n --agree-tos -m andrey@aestasit.com -d dashboard.devternity.com --server https://acme-v02.api.letsencrypt.org/directory
+$SSH sudo docker run --rm --name certbot -it -p 80:80 -p 443:443 -v /etc/letsencrypt:/etc/letsencrypt/ -v /var/log/letsencrypt:/var/log/letsencrypt -v /home/$DEPLOY_USER/.secrets/certbot:/secrets certbot/dns-cloudflare certonly --dns-cloudflare --dns-cloudflare-credentials /secrets/cloudflare.ini --dns-cloudflare-propagation-seconds 60 -n --agree-tos -m andrey@aestasit.com -d dashboard.devternity.com --server https://acme-v02.api.letsencrypt.org/directory
 $SSH sudo rm -rf /home/$DEPLOY_USER/.secrets
 rm -rf ./cloudflare.ini
 

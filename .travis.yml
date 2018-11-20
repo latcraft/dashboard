@@ -12,9 +12,6 @@ deploy:
   script: "./deploy.sh"
   on:
     branch: master
-env:
-  global:
-    secure: "K4dDTtE651W44u2gC+6rErOruk/5FiZnLhfVYQfUdyA3Gc+XavZ6Wt+Tc4etdYgPauHwowce4m7+ybhtbTILdpMWStZ1WI3s6phm+Lqw6pl4yb90FZdABPzuYYCJCVOZbBNvO89PiwqrRBgPPeZPnJsXJftdDHqBcL1OJUpH4+0="
 notifications:
   slack:
     secure: aoxT6eaioY2EqGgxxQYT7Yr2UmlGxbCX023+fj7DDkvqpevZ5uycjHWCucYj7A4DdCRVNFaI8Pt7Fm0Hzya8LpPWlV6xWiJ9pl7dj1yH+HjG7AFUcIKwY+ZA9nXTOC/pvNincq09PFpzwoyO6Op31mc6wU/EH29ZnhEYwN9OGlA=
