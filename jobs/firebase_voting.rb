@@ -45,7 +45,7 @@ end
 # Job's schedules.
 ###########################################################################
 
-SCHEDULER.every '1m', :first_in => 0 do |job| 
+SCHEDULER.every '15m', :first_in => 0 do |job| 
 
   today_votes_by_color = group_by_color(today_votes(raw_votes()))
   send_event('greens', { current: (today_votes_by_color["green"] || []).length }) 
