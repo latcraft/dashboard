@@ -23,3 +23,6 @@ Dashing.on 'ready', ->
       draggable:
         stop: Dashing.showGridsterInstructions
         start: -> Dashing.currentWidgetPositions = Dashing.getWidgetPositions()
+
+  Batman.Filters.fixed = (num, f) ->
+    return parseFloat(num).toFixed(f)
