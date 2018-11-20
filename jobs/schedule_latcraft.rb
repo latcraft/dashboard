@@ -28,7 +28,7 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
     sessions = next_event['schedule']
     sessions.each do |session|
       if !session['img'].nil? and !session['img'].empty? and !session['img'].start_with?('http')
-        session['img'] = "http://latcraft.lv/" + session['img']
+        session['img'] = "https://latcraft.lv/" + session['img']
       end
     end
     send_event('schedule', sessions: sessions)

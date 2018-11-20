@@ -65,7 +65,7 @@ module Devternity
         :title     => time_slot['title'],
         :type      => time_slot['type'],
         :room_name => type2room(time_slot['type'], time_slot['title']),
-        :img       => time_slot['img'].nil? ? type2image(time_slot['type'], time_slot['title']) : 'http://devternity.com/' + time_slot['img']
+        :img       => time_slot['img'].nil? ? type2image(time_slot['type'], time_slot['title']) : 'https://devternity.com/' + time_slot['img']
       }
     end
     future_slots     = time_slots.select { |time_slot| to_min(time_slot[:time_code]) > current_min }  
