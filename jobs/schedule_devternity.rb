@@ -27,7 +27,7 @@ module Devternity
     elsif title.include? "Final"
       return base_path + 'dash_finish.png'
     elsif title.include? "Beer"
-      return base_path + 'beer_colorful.png'
+      return base_path + 'beer2.png'
     elsif type == "start"
       return base_path + 'dash_start.png'
     elsif type == "break"
