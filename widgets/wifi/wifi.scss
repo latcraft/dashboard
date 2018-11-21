@@ -3,11 +3,6 @@
 // ----------------------------------------------------------------------------
 $background-color:  #ec663c;
 
-$title-color:      rgba(255, 255, 255, 0.7);
-$text-color:       rgba(255, 255, 255, 0.5);
-$ssid-color:       rgba(255, 255, 255, 1);
-$password-color:   rgba(255, 255, 255, 1);
-
 // ----------------------------------------------------------------------------
 // Widget-wifi styles
 // ----------------------------------------------------------------------------
@@ -17,23 +12,19 @@ $password-color:   rgba(255, 255, 255, 1);
 
   .title {
     font-size: 50px;
-    color: $title-color;  
   }
 
   p {
     font-size: 25px;
-    color: $text-color;  
   }
 
   .ssid {
     font-size: 35px;
-    color: $ssid-color;
   }
 
   .password {
     font-size: 35px;
     font-family: monospace;
-    color: $password-color;
   }
 
 }
