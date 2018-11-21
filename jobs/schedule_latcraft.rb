@@ -19,7 +19,7 @@ global_config = YAML.load_file('./config/integrations.yml')
 # Job's body.
 ###########################################################################
 
-SCHEDULER.every '1m', :first_in => 0 do |job|
+SCHEDULER.every '15m', :first_in => 0 do |job|
   current_time = Time.now.in_time_zone('Europe/Riga')
   schedule = JSON.parse(open(global_config['schedule_data_file']) { |f| f.read })
   current_month = "#{Date::MONTHNAMES[(Date.today + 15).month]} #{(Date.today + 15).year}"
