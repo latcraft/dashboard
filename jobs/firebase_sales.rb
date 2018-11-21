@@ -124,6 +124,6 @@ end
 
 stats = DevternityFirebaseStats.new($firebase_config, $firebase_json)
 
-SCHEDULER.every '15m', :first_in => 0 do |job| 
-  stats.call(job)
-end
+# SCHEDULER.every '15m', :first_in => 0 do |job| 
+#   stats.call(job)
+# end

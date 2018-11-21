@@ -25,7 +25,7 @@ SCHEDULER.in '1s' do |job|
   5.times { send_photo_update() }
 end
 
-SCHEDULER.every '6s', :first_in => '6s' do |job|
+SCHEDULER.every '10s', :first_in => '6s' do |job|
   send_photo_update()
 end
 

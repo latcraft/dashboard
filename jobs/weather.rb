@@ -44,7 +44,7 @@ end
 # Job's body.
 ###########################################################################
 
-SCHEDULER.every '5m', :first_in => 0 do |job|
+SCHEDULER.every '15m', :first_in => 0 do |job|
 
   url = [
     "http://query.yahooapis.com/v1/public/yql?",

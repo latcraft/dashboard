@@ -57,7 +57,7 @@ end
 # Job's schedules.
 ###########################################################################
 
-SCHEDULER.every '1m', :first_in => 0 do |job|
+SCHEDULER.every '15m', :first_in => 0 do |job|
   stats = page_stats($fb_page)
   send_event('facebook_likes', current: stats[:likes])
   send_event('facebook_checkins', current: stats[:checkins])
@@ -65,7 +65,7 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
   send_event('facebook_talking_about_count', current: stats[:talking_about])
 end
 
-SCHEDULER.every '1m', :first_in => 0 do |job|
+SCHEDULER.every '15m', :first_in => 0 do |job|
   ratings = page_ratings($fb_page)
   send_event('facebook_ratings', ratings: ratings[:ratings])
 end
