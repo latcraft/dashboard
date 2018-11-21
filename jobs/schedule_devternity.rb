@@ -27,7 +27,7 @@ module Devternity
     elsif title.include? "Final"
       return base_path + 'dash_finish.png'
     elsif title.include? "Beer"
-      return base_path + 'dash_party.png'
+      return base_path + 'beer_colorful.png'
     elsif type == "start"
       return base_path + 'dash_start.png'
     elsif type == "break"
@@ -40,7 +40,7 @@ module Devternity
     if title.include? "Lunch"
       return 'HALLWAYS'
     elsif title.include? "Beer"
-      return 'STARGOROD'
+      return ' '
     elsif title.include? "Opening"
       return 'TRACK '
     elsif title.include? "Final"
