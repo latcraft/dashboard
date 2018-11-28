@@ -21,24 +21,16 @@ $firebase_config = JSON.parse($firebase_json)
 $base_url = "https://#{$firebase_config['project_id']}.firebaseio.com/"
 $firebase_client = Firebase::Client.new($base_url, $firebase_json)
 
-def raw_votes()
-  response = $firebase_client.get("votes")
+def now
+  Time.now.in_time_zone('Europe/Riga')
+end
+
+def votes_for_date(date = now())
+  from = date.in_time_zone('Europe/Riga').beginning_of_day
+  to   = date.in_time_zone('Europe/Riga').end_of_day
+  response = $firebase_client.get("votes", { 'orderBy' => '"created"', 'startAt' => from.to_i, 'endAt' => to.to_i })
   raise "DT error #{response.code} (#{response.body})" unless response.success?
-  response.body
-end
-
-def today_votes(votes = raw_votes())
-  from = Time.now.in_time_zone('Europe/Riga').beginning_of_day
-  to   = Time.now.in_time_zone('Europe/Riga').end_of_day
-  votes.select { |id, vote| 
-    !vote["created"].nil? && 
-     vote["created"] >= from.to_i && 
-     vote["created"] <= to.to_i 
-  }
-end
-
-def group_by_color(votes = today_votes())
-  votes.group_by { |id, vote| vote["color"] }
+  response.body || []
 end
 
 ###########################################################################
@@ -47,7 +39,6 @@ end
 
 SCHEDULER.every '15m', :first_in => 0 do |job| 
 
-  today_votes_by_color = group_by_color(today_votes(raw_votes()))
-  send_event('greens', { current: (today_votes_by_color["green"] || []).length }) 
+  send_event('greens', { current: (votes_for_date(now()) || []).length }) 
 
 end
