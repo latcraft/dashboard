@@ -32,5 +32,3 @@ Run within Vagrant
 1. Create/decrypt configuration files inside the `config` directory with proper API keys and secrets.
 2. `vagrant up`
 3. Go to <http://192.168.111.201:3030/devternity2>
-
-
