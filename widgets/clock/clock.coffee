@@ -4,8 +4,7 @@ class Dashing.Clock extends Dashing.Widget
     setInterval(@startTime, 500)
 
   startTime: =>
-    today = new Date()
-
+    today = @timeInRiga()
     h = today.getHours()
     m = today.getMinutes()
     s = today.getSeconds()
@@ -16,3 +15,10 @@ class Dashing.Clock extends Dashing.Widget
 
   formatTime: (i) ->
     if i < 10 then "0" + i else i
+
+
+  timeInRiga: () ->
+    date = new Date()
+    invdate = new Date(date.toLocaleString('en-US', { timeZone: "Europe/Riga" }))
+    diff = invdate.getTime() - date.getTime() 
+    return new Date(date.getTime() + diff)
