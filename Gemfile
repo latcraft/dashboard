@@ -6,6 +6,8 @@ gem 'pry-byebug'
 gem 'firebase'
 gem 'koala'
 
+gem "honeycomb-beeline"
+
 gem 'twitter', '6.2.0'
 gem 'xml-simple', '1.1.4'
 gem 'json', '1.8.2'
