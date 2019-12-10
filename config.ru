@@ -1,6 +1,6 @@
 
 require 'dashing'
-require "honeycomb-beeline"
+require 'honeycomb-beeline'
 
 Honeycomb.configure do |config|
   config.write_key = "cbc71c0b5517257a845b7d0aa71df70c"

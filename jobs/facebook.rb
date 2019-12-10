@@ -3,6 +3,12 @@
 require 'yaml'
 require 'koala'
 require 'active_support/time'
+require 'honeycomb-beeline'
+
+Honeycomb.configure do |config|
+  config.write_key = "cbc71c0b5517257a845b7d0aa71df70c"
+  config.dataset = "devternity"
+end
 
 ###########################################################################
 # Load configuration parameters.
