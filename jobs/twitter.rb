@@ -23,6 +23,9 @@ db_path = global_config['twitter_db_path'] || '/var/lib/sqlite/twitter.db'
 Honeycomb.configure do |config|
   config.write_key = global_config['honeycomb_key'] 
   config.dataset = global_config['honeycomb_dataset'] || 'devternity'
+  config.notification_events = %w[
+    sql.active_record
+  ].freeze  
 end
 
 ###########################################################################

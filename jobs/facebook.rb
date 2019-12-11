@@ -15,8 +15,8 @@ $fb_page = URI::encode($global_config['facebook_page'] || "DevTernity")
 $graph = Koala::Facebook::API.new($global_config['facebook_access_token'], $global_config['facebook_app_secret'])
 
 Honeycomb.configure do |config|
-  config.write_key = global_config['honeycomb_key'] 
-  config.dataset = global_config['honeycomb_dataset'] || 'devternity'
+  config.write_key = $global_config['honeycomb_key'] 
+  config.dataset = $global_config['honeycomb_dataset'] || 'devternity'
 end
 
 def page_stats(page_name)

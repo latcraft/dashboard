@@ -22,8 +22,8 @@ $base_url = "https://#{$firebase_config['project_id']}.firebaseio.com/"
 $firebase_client = Firebase::Client.new($base_url, $firebase_json)
 
 Honeycomb.configure do |config|
-  config.write_key = global_config['honeycomb_key'] 
-  config.dataset = global_config['honeycomb_dataset'] || 'devternity'
+  config.write_key = $global_config['honeycomb_key'] 
+  config.dataset = $global_config['honeycomb_dataset'] || 'devternity'
 end
 
 def now

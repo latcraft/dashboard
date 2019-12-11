@@ -14,8 +14,8 @@ $photo_config = YAML.load_file('./config/photos.yml') || {}
 $photos = $photo_config['photos'] || [ '/assets/splash2018.png' ]
 
 Honeycomb.configure do |config|
-  config.write_key = global_config['honeycomb_key'] 
-  config.dataset = global_config['honeycomb_dataset'] || 'devternity'
+  config.write_key = $global_config['honeycomb_key'] 
+  config.dataset = $global_config['honeycomb_dataset'] || 'devternity'
 end
 
 def send_photo_update()

@@ -9,6 +9,17 @@ require 'yaml'
 require 'date'
 
 ###########################################################################
+# Job's body.
+###########################################################################
+
+$global_config = YAML.load_file('./config/integrations.yml') || {}
+
+Honeycomb.configure do |config|
+  config.write_key = $global_config['honeycomb_key'] 
+  config.dataset = $global_config['honeycomb_dataset'] || 'devternity'
+end
+
+###########################################################################
 # Job's module.
 ###########################################################################
 
