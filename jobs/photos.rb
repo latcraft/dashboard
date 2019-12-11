@@ -9,8 +9,14 @@ require 'yaml'
 $photo_position = 0
 $photo_index = 0
 
+$global_config = YAML.load_file('./config/integrations.yml') || {}
 $photo_config = YAML.load_file('./config/photos.yml') || {}
 $photos = $photo_config['photos'] || [ '/assets/splash2018.png' ]
+
+Honeycomb.configure do |config|
+  config.write_key = global_config['honeycomb_key'] 
+  config.dataset = global_config['honeycomb_dataset'] || 'devternity'
+end
 
 def send_photo_update()
   next_position = 'photo' + (1 + ($photo_position % 5)).to_s
