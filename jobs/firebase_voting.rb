@@ -10,6 +10,7 @@ require 'firebase'
 require 'net/http'
 require 'open-uri'
 require 'uri'
+require 'honeycomb-beeline'
 
 ###########################################################################
 # Load configuration parameters.

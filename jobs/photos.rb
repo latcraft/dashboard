@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 require 'yaml'
+require 'honeycomb-beeline'
 
 ###########################################################################
 # Job's body.

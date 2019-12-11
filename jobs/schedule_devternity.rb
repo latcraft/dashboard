@@ -7,6 +7,7 @@ require 'active_support/time'
 require 'uri'
 require 'yaml'
 require 'date'
+require 'honeycomb-beeline'
 
 ###########################################################################
 # Job's body.
