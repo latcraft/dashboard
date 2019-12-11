@@ -1,10 +1,13 @@
 
 require 'dashing'
+require 'yaml'
 require 'honeycomb-beeline'
 
+$global_config = YAML.load_file('./config/integrations.yml') || {}
+
 Honeycomb.configure do |config|
-  config.write_key = "cbc71c0b5517257a845b7d0aa71df70c"
-  config.dataset = "devternity"
+  config.write_key = $global_config['honeycomb_key'] 
+  config.dataset = $global_config['honeycomb_dataset'] || 'devternity'
 end
 
 configure do
