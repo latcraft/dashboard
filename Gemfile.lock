@@ -62,7 +62,7 @@ GEM
     httpclient (2.8.3)
     i18n (1.1.1)
       concurrent-ruby (~> 1.0)
-    json (1.8.2)
+    json (2.3.0)
     jwt (2.1.0)
     koala (3.0.0)
       addressable
@@ -171,7 +171,7 @@ DEPENDENCIES
   firebase
   honeycomb-beeline
   htmlentities (= 4.3.4)
-  json (= 1.8.2)
+  json (= 2.3.0)
   koala
   pry-byebug
   rest-client (= 1.8.0)
